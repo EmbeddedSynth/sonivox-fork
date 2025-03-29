@@ -125,6 +125,9 @@
 #include "eas_report.h"
 #include <string.h>
 
+// for a-law/u-law decoding
+#include "pcm_aulaw.h"
+
 //2 we should replace log10() function with fixed point routine in ConvertSampleRate()
 /* lint is choking on the ARM math.h file, so we declare the log10 function here */
 extern double log10(double x);
@@ -231,6 +234,7 @@ typedef struct
     EAS_U32 loopStart;
     EAS_U32 loopLength;
     EAS_U32 sampleRate;
+    EAS_U16 fmtTag;
     EAS_U16 bitsPerSample;
     EAS_I16 fineTune;
     EAS_U8  unityNote;
@@ -1201,10 +1205,16 @@ static EAS_RESULT Parse_fmt (SDLS_SYNTHESIZER_DATA *pDLSData, EAS_I32 pos, S_WSM
     /* get format tag */
     if ((result = EAS_HWGetWord(pDLSData->hwInstData, pDLSData->fileHandle, &wtemp, EAS_FALSE)) != EAS_SUCCESS)
         return result;
-    if (wtemp != WAVE_FORMAT_PCM)
+    switch(wtemp)
     {
-        { /* dpp: EAS_ReportEx(_EAS_SEVERITY_ERROR, "Unsupported DLS sample format %04x\n", wtemp); */ }
-        return EAS_ERROR_UNRECOGNIZED_FORMAT;
+        case WAVE_FORMAT_PCM:
+        case WAVE_FORMAT_ALAW:
+        case WAVE_FORMAT_MULAW:
+            p->fmtTag = wtemp;
+            break;
+        default:
+            { /* dpp: EAS_ReportEx(_EAS_SEVERITY_ERROR, "Unsupported DLS sample format %04x\n", wtemp); */ }
+            return EAS_ERROR_UNRECOGNIZED_FORMAT;
     }
 
     /* get number of channels */
@@ -1267,6 +1277,9 @@ static EAS_RESULT Parse_data (SDLS_SYNTHESIZER_DATA *pDLSData, EAS_I32 pos, EAS_
     EAS_I32 count;
     EAS_I32 i;
     EAS_I8 *p;
+
+    if (pWsmp->fmtTag != WAVE_FORMAT_PCM)
+        return EAS_ERROR_UNRECOGNIZED_FORMAT;
 
     /* seek to start of chunk */
     if ((result = EAS_HWFileSeek(pDLSData->hwInstData, pDLSData->fileHandle, pos)) != EAS_SUCCESS)
@@ -1358,9 +1371,26 @@ static EAS_RESULT Parse_data (SDLS_SYNTHESIZER_DATA *pDLSData, EAS_I32 pos, EAS_
         }
         else
         {
-            for(i=0; i<count; i++)
+            switch(pWsmp->fmtTag)
             {
-                *p++ = (short)((convBuf[i] ^ 0x80) << 8);
+                case WAVE_FORMAT_ALAW:
+                    for(i=0; i<count; i++)
+                    {
+                        *p++ = alaw2linear(convBuf[i]);
+                    }
+                    break;
+                case WAVE_FORMAT_MULAW:
+                    for(i=0; i<count; i++)
+                    {
+                        *p++ = ulaw2linear(convBuf[i]);
+                    }
+                    break;
+                case WAVE_FORMAT_PCM:
+                    for(i=0; i<count; i++)
+                    {
+                        *p++ = (short)((convBuf[i] ^ 0x80) << 8);
+                    }
+                    break;
             }
         }
 

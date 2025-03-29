@@ -243,6 +243,8 @@ This is useful for determining the DLS chunk types
 
 
 #define WAVE_FORMAT_PCM             0x0001 /* Microsoft PCM format, see DLS2.1 p60 */
+#define WAVE_FORMAT_ALAW            0x0006 /* Defined same as Microsoft's mmreg.h */
+#define WAVE_FORMAT_MULAW           0x0007 /* Defined same as Microsoft's mmreg.h */
 #define WAVE_FORMAT_EXTENSIBLE      0xffff
 
 /* defines for wave table structures */
