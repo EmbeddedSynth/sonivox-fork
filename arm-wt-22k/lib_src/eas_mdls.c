@@ -1383,9 +1383,9 @@ static EAS_RESULT Parse_data (SDLS_SYNTHESIZER_DATA *pDLSData, EAS_I32 pos, EAS_
                     for(i=0; i<count; i++)
                     {
                         *p++ = ulaw2linear(convBuf[i]);
+                    }
                     break;
-                }
-                default:
+                case WAVE_FORMAT_PCM:
                     for(i=0; i<count; i++)
                     {
                         *p++ = (short)((convBuf[i] ^ 0x80) << 8);
