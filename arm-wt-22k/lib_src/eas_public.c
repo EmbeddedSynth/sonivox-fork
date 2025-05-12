@@ -2648,7 +2648,7 @@ void static_checks()
     _Static_assert(compare_types(EAS_BOOL8, uint8_t), "check type EAS_BOOL8");
     _Static_assert(compare_types(EAS_U8, uint8_t), "check type EAS_U8");
     _Static_assert(compare_types(EAS_I8, int8_t), "check type EAS_I8");
-    _Static_assert(compare_types(EAS_CHAR, signed char), "check type EAS_CHAR");
+    _Static_assert(compare_types(EAS_CHAR, char), "check type EAS_CHAR");
     _Static_assert(compare_types(EAS_U16, uint16_t), "check type EAS_U16");
     _Static_assert(compare_types(EAS_I16, int16_t), "check type EAS_I16");
     _Static_assert(compare_types(EAS_U32, uint64_t), "check type EAS_U32");
