@@ -2642,16 +2642,19 @@ EAS_RESULT EAS_SearchFile (S_EAS_DATA *pEASData, EAS_FILE_HANDLE fileHandle, con
 
 void static_checks()
 {
-    _Static_assert(compare_types(EAS_RESULT, int64_t), "check type EAS_RESULT");
+    _Static_assert(compare_types(EAS_RESULT, signed long), "check type EAS_RESULT");
     _Static_assert(compare_types(EAS_STATE, int64_t), "check type EAS_STATE");
     _Static_assert(compare_types(EAS_BOOL, uint32_t), "check type EAS_BOOL");
     _Static_assert(compare_types(EAS_BOOL8, uint8_t), "check type EAS_BOOL8");
     _Static_assert(compare_types(EAS_U8, uint8_t), "check type EAS_U8");
     _Static_assert(compare_types(EAS_I8, int8_t), "check type EAS_I8");
-    _Static_assert(compare_types(EAS_CHAR, char), "check type EAS_CHAR");
+    _Static_assert(compare_types(EAS_CHAR, signed char), "check type EAS_CHAR");
     _Static_assert(compare_types(EAS_U16, uint16_t), "check type EAS_U16");
     _Static_assert(compare_types(EAS_I16, int16_t), "check type EAS_I16");
     _Static_assert(compare_types(EAS_U32, uint64_t), "check type EAS_U32");
     _Static_assert(compare_types(EAS_I32, int64_t), "check type EAS_I32");
-    _Static_assert(compare_types(EAS_PCM, int16_t), "check type EAS_PCM");
+    _Static_assert(compare_types(EAS_UINT, unsigned int), "check type EAS_UINT");
+    _Static_assert(compare_types(EAS_INT, signed int), "check type EAS_INT");
+    _Static_assert(compare_types(EAS_LONG, signed long), "check type EAS_LONG");
+   _Static_assert(compare_types(EAS_PCM, int16_t), "check type EAS_PCM");
 }
