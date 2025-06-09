@@ -139,7 +139,7 @@ else()
     list(APPEND SOURCES arm-wt-22k/host_src/eas_hostmm.c)
 endif()
 
-configure_file(arm-wt-22k/host_src/eas.cmake libsonivox/eas.h @ONLY)
+configure_file(arm-wt-22k/host_src/eas_version.h.in libsonivox/eas_version.h @ONLY)
 
 list(APPEND HEADERS
     ${CMAKE_CURRENT_BINARY_DIR}/libsonivox/eas.h
