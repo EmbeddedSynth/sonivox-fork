@@ -384,7 +384,7 @@ EAS_RESULT SMF_Event (S_EAS_DATA *pEASData, EAS_VOID_PTR pInstData, EAS_INT pars
  *----------------------------------------------------------------------------
 */
 /*lint -esym(715, pEASData) reserved for future use */
-EAS_RESULT SMF_State (S_EAS_DATA *pEASData, EAS_VOID_PTR pInstData, EAS_I32 *pState)
+EAS_RESULT SMF_State (S_EAS_DATA *pEASData, EAS_VOID_PTR pInstData, EAS_ISIZE *pState)
 {
     S_SMF_DATA* pSMFData;
 
@@ -609,7 +609,7 @@ EAS_RESULT SMF_Resume (S_EAS_DATA *pEASData, EAS_VOID_PTR pInstData)
  *----------------------------------------------------------------------------
 */
 /*lint -esym(715, pEASData) reserved for future use */
-EAS_RESULT SMF_SetData (S_EAS_DATA *pEASData, EAS_VOID_PTR pInstData, EAS_I32 param, EAS_I32 value)
+EAS_RESULT SMF_SetData (S_EAS_DATA *pEASData, EAS_VOID_PTR pInstData, EAS_I32 param, EAS_ISIZE value)
 {
     S_SMF_DATA *pSMFData;
 
@@ -696,7 +696,7 @@ EAS_RESULT SMF_SetData (S_EAS_DATA *pEASData, EAS_VOID_PTR pInstData, EAS_I32 pa
  *----------------------------------------------------------------------------
 */
 /*lint -esym(715, pEASData) reserved for future use */
-EAS_RESULT SMF_GetData (S_EAS_DATA *pEASData, EAS_VOID_PTR pInstData, EAS_I32 param, EAS_I32 *pValue)
+EAS_RESULT SMF_GetData (S_EAS_DATA *pEASData, EAS_VOID_PTR pInstData, EAS_I32 param, EAS_ISIZE *pValue)
 {
     S_SMF_DATA *pSMFData;
 
@@ -732,7 +732,7 @@ EAS_RESULT SMF_GetData (S_EAS_DATA *pEASData, EAS_VOID_PTR pInstData, EAS_I32 pa
 #endif
 
         case PARSER_DATA_SYNTH_HANDLE:
-            *pValue = (EAS_I32) pSMFData->pSynth;
+            *pValue = (EAS_ISIZE) pSMFData->pSynth;
             break;
 
         default:

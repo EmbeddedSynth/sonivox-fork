@@ -69,8 +69,8 @@ static EAS_RESULT TC_Close (S_EAS_DATA *pEASData, EAS_VOID_PTR pInstData);
 static EAS_RESULT TC_Reset (S_EAS_DATA *pEASData, EAS_VOID_PTR pInstData);
 static EAS_RESULT TC_Pause (S_EAS_DATA *pEASData, EAS_VOID_PTR pInstData);
 static EAS_RESULT TC_Resume (S_EAS_DATA *pEASData, EAS_VOID_PTR pInstData);
-static EAS_RESULT TC_SetData (S_EAS_DATA *pEASData, EAS_VOID_PTR pInstData, EAS_I32 param, EAS_I32 value);
-static EAS_RESULT TC_GetData (S_EAS_DATA *pEASData, EAS_VOID_PTR pInstData, EAS_I32 param, EAS_I32 *pValue);
+static EAS_RESULT TC_SetData (S_EAS_DATA *pEASData, EAS_VOID_PTR pInstData, EAS_I32 param, EAS_ISIZE value);
+static EAS_RESULT TC_GetData (S_EAS_DATA *pEASData, EAS_VOID_PTR pInstData, EAS_I32 param, EAS_ISIZE *pValue);
 static EAS_RESULT TC_ParseHeader (S_EAS_DATA *pEASData, S_TC_DATA* pData);
 static EAS_RESULT TC_StartNote (S_EAS_DATA *pEASData, S_TC_DATA* pData, EAS_INT parserMode, EAS_I8 note);
 static EAS_RESULT TC_GetRepeat (S_EAS_DATA *pEASData, S_TC_DATA* pData, EAS_INT parserMode);
@@ -386,7 +386,7 @@ static EAS_RESULT TC_Event (S_EAS_DATA *pEASData, EAS_VOID_PTR pInstData, EAS_IN
  *----------------------------------------------------------------------------
 */
 /*lint -esym(715, pEASData) reserved for future use */
-static EAS_RESULT TC_State (S_EAS_DATA *pEASData, EAS_VOID_PTR pInstData, EAS_I32 *pState)
+static EAS_RESULT TC_State (S_EAS_DATA *pEASData, EAS_VOID_PTR pInstData, EAS_STATE *pState)
 {
     S_TC_DATA* pData;
 
@@ -573,7 +573,7 @@ static EAS_RESULT TC_Resume (S_EAS_DATA *pEASData, EAS_VOID_PTR pInstData)
  *----------------------------------------------------------------------------
 */
 /*lint -esym(715, pEASData, pInstData, value) reserved for future use */
-static EAS_RESULT TC_SetData (S_EAS_DATA *pEASData, EAS_VOID_PTR pInstData, EAS_I32 param, EAS_I32 value)
+static EAS_RESULT TC_SetData (S_EAS_DATA *pEASData, EAS_VOID_PTR pInstData, EAS_I32 param, EAS_ISIZE value)
 {
     /* we don't parse any metadata, but we need to return success here */
     if (param == PARSER_DATA_METADATA_CB)
@@ -600,7 +600,7 @@ static EAS_RESULT TC_SetData (S_EAS_DATA *pEASData, EAS_VOID_PTR pInstData, EAS_
  *----------------------------------------------------------------------------
 */
 /*lint -e{715} common with other parsers */
-static EAS_RESULT TC_GetData (S_EAS_DATA *pEASData, EAS_VOID_PTR pInstData, EAS_I32 param, EAS_I32 *pValue)
+static EAS_RESULT TC_GetData (S_EAS_DATA *pEASData, EAS_VOID_PTR pInstData, EAS_I32 param, EAS_ISIZE *pValue)
 {
     S_TC_DATA *pData;
 
@@ -613,7 +613,7 @@ static EAS_RESULT TC_GetData (S_EAS_DATA *pEASData, EAS_VOID_PTR pInstData, EAS_
             break;
 
         case PARSER_DATA_SYNTH_HANDLE:
-            *pValue = (EAS_I32) pData->pSynth;
+            *pValue = (EAS_ISIZE) pData->pSynth;
             break;
 
     default:

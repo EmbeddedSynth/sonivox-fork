@@ -40,8 +40,8 @@ EAS_RESULT SMF_Close (S_EAS_DATA *pEASData, EAS_VOID_PTR pInstData);
 EAS_RESULT SMF_Reset (S_EAS_DATA *pEASData, EAS_VOID_PTR pInstData);
 EAS_RESULT SMF_Pause (S_EAS_DATA *pEASData, EAS_VOID_PTR pInstData);
 EAS_RESULT SMF_Resume (S_EAS_DATA *pEASData, EAS_VOID_PTR pInstData);
-EAS_RESULT SMF_SetData (S_EAS_DATA *pEASData, EAS_VOID_PTR pInstData, EAS_I32 param, EAS_I32 value);
-EAS_RESULT SMF_GetData (S_EAS_DATA *pEASData, EAS_VOID_PTR pInstData, EAS_I32 param, EAS_I32 *pValue);
+EAS_RESULT SMF_SetData (S_EAS_DATA *pEASData, EAS_VOID_PTR pInstData, EAS_I32 param, EAS_ISIZE value);
+EAS_RESULT SMF_GetData (S_EAS_DATA *pEASData, EAS_VOID_PTR pInstData, EAS_I32 param, EAS_ISIZE *pValue);
 EAS_RESULT SMF_ParseHeader (EAS_HW_DATA_HANDLE hwInstData, S_SMF_DATA *pSMFData);
 
 #endif /* end _EAS_SMF_H */

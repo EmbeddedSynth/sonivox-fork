@@ -35,6 +35,8 @@
 #ifndef _EAS_TYPES_H
 #define _EAS_TYPES_H
 
+#include <stdint.h>
+
 /* EAS_RESULT return codes */
 typedef long EAS_RESULT;
 #define EAS_SUCCESS                         0
@@ -131,13 +133,16 @@ typedef short EAS_I16;
 typedef unsigned long long EAS_U32;
 typedef long long EAS_I32;
 #else
-typedef unsigned long EAS_U32;
-typedef long EAS_I32;
+typedef unsigned EAS_U32;
+typedef int EAS_I32;
 #endif
 
 typedef unsigned EAS_UINT;
 typedef int EAS_INT;
 typedef long EAS_LONG;
+
+typedef intptr_t EAS_ISIZE;
+typedef uintptr_t EAS_USIZE;
 
 /* audio output type */
 typedef short EAS_PCM;

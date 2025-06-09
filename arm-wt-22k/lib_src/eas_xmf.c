@@ -92,8 +92,8 @@ static EAS_RESULT XMF_Close (S_EAS_DATA *pEASData, EAS_VOID_PTR pInstData);
 static EAS_RESULT XMF_Reset (S_EAS_DATA *pEASData, EAS_VOID_PTR pInstData);
 static EAS_RESULT XMF_Pause (S_EAS_DATA *pEASData, EAS_VOID_PTR pInstData);
 static EAS_RESULT XMF_Resume (S_EAS_DATA *pEASData, EAS_VOID_PTR pInstData);
-static EAS_RESULT XMF_SetData (S_EAS_DATA *pEASData, EAS_VOID_PTR pInstData, EAS_I32 param, EAS_I32 value);
-static EAS_RESULT XMF_GetData (S_EAS_DATA *pEASData, EAS_VOID_PTR pInstData, EAS_I32 param, EAS_I32 *pValue);
+static EAS_RESULT XMF_SetData (S_EAS_DATA *pEASData, EAS_VOID_PTR pInstData, EAS_I32 param, EAS_ISIZE value);
+static EAS_RESULT XMF_GetData (S_EAS_DATA *pEASData, EAS_VOID_PTR pInstData, EAS_I32 param, EAS_ISIZE *pValue);
 static EAS_RESULT XMF_FindFileContents (EAS_HW_DATA_HANDLE hwInstData, S_XMF_DATA *pXMFData);
 static EAS_RESULT XMF_ReadNode (EAS_HW_DATA_HANDLE hwInstData, S_XMF_DATA *pXMFData, EAS_I32 nodeOffset, EAS_I32 endOffset, EAS_I32 *pLength, EAS_I32 depth);
 static EAS_RESULT XMF_ReadVLQ (EAS_HW_DATA_HANDLE hwInstData, EAS_FILE_HANDLE fileHandle, EAS_U32 *remainingBytes, EAS_I32 *value);
@@ -208,7 +208,7 @@ static EAS_RESULT XMF_CheckFileType (S_EAS_DATA *pEASData, EAS_FILE_HANDLE fileH
     /* locate the SMF and DLS contents */
     if ((result = XMF_FindFileContents(pEASData->hwInstData, pXMFData)) != EAS_SUCCESS)
     {
-        EAS_Report(_EAS_SEVERITY_ERROR, "Failed to parse XMF file: %d\n", result);
+        EAS_Report(_EAS_SEVERITY_ERROR, "Failed to parse XMF file: %ld\n", result);
         EAS_HWFree(pEASData->hwInstData, pXMFData);
         return result;
     }
@@ -352,7 +352,7 @@ static EAS_RESULT XMF_Event (S_EAS_DATA *pEASData, EAS_VOID_PTR pInstData, EAS_I
  *
  *----------------------------------------------------------------------------
 */
-static EAS_RESULT XMF_State (S_EAS_DATA *pEASData, EAS_VOID_PTR pInstData, EAS_I32 *pState)
+static EAS_RESULT XMF_State (S_EAS_DATA *pEASData, EAS_VOID_PTR pInstData, EAS_RESULT *pState)
 {
     return SMF_State(pEASData, ((S_XMF_DATA*) pInstData)->pSMFData, pState);
 }
@@ -496,7 +496,7 @@ static EAS_RESULT XMF_Resume (S_EAS_DATA *pEASData, EAS_VOID_PTR pInstData)
  *
  *----------------------------------------------------------------------------
 */
-static EAS_RESULT XMF_SetData (S_EAS_DATA *pEASData, EAS_VOID_PTR pInstData, EAS_I32 param, EAS_I32 value)
+static EAS_RESULT XMF_SetData (S_EAS_DATA *pEASData, EAS_VOID_PTR pInstData, EAS_I32 param, EAS_ISIZE value)
 {
     return SMF_SetData(pEASData, ((S_XMF_DATA*) pInstData)->pSMFData, param, value);
 }
@@ -519,7 +519,7 @@ static EAS_RESULT XMF_SetData (S_EAS_DATA *pEASData, EAS_VOID_PTR pInstData, EAS
  *
  *----------------------------------------------------------------------------
 */
-static EAS_RESULT XMF_GetData (S_EAS_DATA *pEASData, EAS_VOID_PTR pInstData, EAS_I32 param, EAS_I32 *pValue)
+static EAS_RESULT XMF_GetData (S_EAS_DATA *pEASData, EAS_VOID_PTR pInstData, EAS_I32 param, EAS_ISIZE *pValue)
 {
     EAS_RESULT result;
 
@@ -816,7 +816,7 @@ static EAS_RESULT XMF_ReadNode (EAS_HW_DATA_HANDLE hwInstData, S_XMF_DATA *pXMFD
             strm.avail_out = unpackedSize;
             result = inflateInit(&strm);
             if (result != Z_OK) {
-                EAS_Report(_EAS_SEVERITY_ERROR, "Failed to initialize zlib for unpacking XMF data: %d\n", result);
+                EAS_Report(_EAS_SEVERITY_ERROR, "Failed to initialize zlib for unpacking XMF data: %ld\n", result);
                 EAS_HWFree(hwInstData, unpackedData);
                 return EAS_FAILURE;
             }
@@ -849,7 +849,7 @@ static EAS_RESULT XMF_ReadNode (EAS_HW_DATA_HANDLE hwInstData, S_XMF_DATA *pXMFD
                         goto ZLIBReadFin;
                     }
                     if (result != Z_OK) {
-                        EAS_Report(_EAS_SEVERITY_ERROR, "ZLIB unpacking error in XMF node: %d\n", result);
+                        EAS_Report(_EAS_SEVERITY_ERROR, "ZLIB unpacking error in XMF node: %ld\n", result);
                         EAS_HWFree(hwInstData, unpackedData);
                         inflateEnd(&strm);
                         return EAS_ERROR_FILE_FORMAT;

@@ -31,8 +31,9 @@
 #ifndef _EAS_MIDITYPES_H
 #define _EAS_MIDITYPES_H
 
-#include "eas_data.h"
 #include "eas_parser.h"
+
+typedef struct s_synth_tag S_SYNTH;
 
 /*----------------------------------------------------------------------------
  * S_MIDI_STREAM

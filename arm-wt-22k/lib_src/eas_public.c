@@ -98,7 +98,7 @@ static EAS_RESULT EAS_ParseEvents (S_EAS_DATA *pEASData, S_EAS_STREAM *pStream, 
  * value            - new value
  *----------------------------------------------------------------------------
 */
-EAS_RESULT EAS_SetStreamParameter (S_EAS_DATA *pEASData, EAS_HANDLE pStream, EAS_I32 param, EAS_I32 value)
+EAS_RESULT EAS_SetStreamParameter (S_EAS_DATA *pEASData, EAS_HANDLE pStream, EAS_I32 param, EAS_ISIZE value)
 {
     S_FILE_PARSER_INTERFACE *pParserModule;
 
@@ -120,7 +120,7 @@ EAS_RESULT EAS_SetStreamParameter (S_EAS_DATA *pEASData, EAS_HANDLE pStream, EAS
  * pValue           - pointer to variable to receive current setting
  *----------------------------------------------------------------------------
 */
-EAS_RESULT EAS_GetStreamParameter (S_EAS_DATA *pEASData, EAS_HANDLE pStream, EAS_I32 param, EAS_I32 *pValue)
+EAS_RESULT EAS_GetStreamParameter (S_EAS_DATA *pEASData, EAS_HANDLE pStream, EAS_I32 param, EAS_ISIZE *pValue)
 {
     S_FILE_PARSER_INTERFACE *pParserModule;
 
@@ -161,7 +161,7 @@ EAS_BOOL EAS_StreamReady (S_EAS_DATA *pEASData, EAS_HANDLE pStream)
  * code in the parser.
  *----------------------------------------------------------------------------
 */
-EAS_RESULT EAS_IntSetStrmParam (S_EAS_DATA *pEASData, EAS_HANDLE pStream, EAS_INT param, EAS_I32 value)
+EAS_RESULT EAS_IntSetStrmParam (S_EAS_DATA *pEASData, EAS_HANDLE pStream, EAS_INT param, EAS_ISIZE value)
 {
     S_SYNTH *pSynth;
 
@@ -171,7 +171,7 @@ EAS_RESULT EAS_IntSetStrmParam (S_EAS_DATA *pEASData, EAS_HANDLE pStream, EAS_IN
 
     /* get a pointer to the synth object and set it directly */
     /*lint -e{740} we are cheating by passing a pointer through this interface */
-    if (EAS_GetStreamParameter(pEASData, pStream, PARSER_DATA_SYNTH_HANDLE, (EAS_I32*) &pSynth) != EAS_SUCCESS)
+    if (EAS_GetStreamParameter(pEASData, pStream, PARSER_DATA_SYNTH_HANDLE, (EAS_ISIZE*) &pSynth) != EAS_SUCCESS)
         return EAS_ERROR_INVALID_PARAMETER;
 
     if (pSynth == NULL)
@@ -227,8 +227,10 @@ EAS_RESULT EAS_IntSetStrmParam (S_EAS_DATA *pEASData, EAS_HANDLE pStream, EAS_IN
  * get the parameter directly on the synth.
  *----------------------------------------------------------------------------
 */
-EAS_RESULT EAS_IntGetStrmParam (S_EAS_DATA *pEASData, EAS_HANDLE pStream, EAS_INT param, EAS_I32 *pValue)
+EAS_RESULT EAS_IntGetStrmParam (S_EAS_DATA *pEASData, EAS_HANDLE pStream, EAS_INT param, EAS_ISIZE *pValue)
 {
+    EAS_RESULT result;
+    EAS_I32 value;
     S_SYNTH *pSynth;
 
     /* try to set the parameter */
@@ -237,7 +239,7 @@ EAS_RESULT EAS_IntGetStrmParam (S_EAS_DATA *pEASData, EAS_HANDLE pStream, EAS_IN
 
     /* get a pointer to the synth object and retrieve data directly */
     /*lint -e{740} we are cheating by passing a pointer through this interface */
-    if (EAS_GetStreamParameter(pEASData, pStream, PARSER_DATA_SYNTH_HANDLE, (EAS_I32*) &pSynth) != EAS_SUCCESS)
+    if (EAS_GetStreamParameter(pEASData, pStream, PARSER_DATA_SYNTH_HANDLE, (EAS_ISIZE*) &pSynth) != EAS_SUCCESS)
         return EAS_ERROR_INVALID_PARAMETER;
 
     if (pSynth == NULL)
@@ -246,13 +248,18 @@ EAS_RESULT EAS_IntGetStrmParam (S_EAS_DATA *pEASData, EAS_HANDLE pStream, EAS_IN
     switch (param)
     {
         case PARSER_DATA_POLYPHONY:
-            return VMGetPolyphony(pEASData->pVoiceMgr, pSynth, pValue);
+            result = VMGetPolyphony(pEASData->pVoiceMgr, pSynth, &value);
+            *pValue = value;
+            return result;
 
         case PARSER_DATA_PRIORITY:
-            return VMGetPriority(pEASData->pVoiceMgr, pSynth, pValue);
+            result = VMGetPriority(pEASData->pVoiceMgr, pSynth, &value);
+            *pValue = value;
+            return result;
 
         case PARSER_DATA_TRANSPOSITION:
-            VMGetTranposition(pSynth, pValue);
+            VMGetTranposition(pSynth, &value);
+            *pValue = value;
             break;
 
         case PARSER_DATA_NOTE_COUNT:
@@ -433,7 +440,7 @@ EAS_PUBLIC EAS_RESULT EAS_Init (EAS_DATA_HANDLE *ppEASData)
         {
             if ((result = (*pEASData->effectsModules[module].effect->pfInit)(pEASData, &pEASData->effectsModules[module].effectData)) != EAS_SUCCESS)
             {
-                EAS_Report(_EAS_SEVERITY_FATAL, "Initialization of effects module %d returned %d\n", module, result);
+                EAS_Report(_EAS_SEVERITY_FATAL, "Initialization of effects module %d returned %ld\n", module, result);
                 return result;
             }
         }
@@ -515,7 +522,7 @@ EAS_PUBLIC EAS_RESULT EAS_Shutdown (EAS_DATA_HANDLE pEASData)
         {
             if ((result = (*pEASData->effectsModules[i].effect->pfShutdown)(pEASData, pEASData->effectsModules[i].effectData)) != EAS_SUCCESS)
             {
-                EAS_Report(_EAS_SEVERITY_FATAL, "Shutdown of effects module %d returned %d\n", i, result);
+                EAS_Report(_EAS_SEVERITY_FATAL, "Shutdown of effects module %d returned %ld\n", i, result);
                 if (reportResult == EAS_SUCCESS)
                     reportResult = result;
             }
@@ -786,7 +793,10 @@ EAS_PUBLIC EAS_RESULT EAS_GetFileType (S_EAS_DATA *pEASData, EAS_HANDLE pStream,
 {
     if (!EAS_StreamReady (pEASData, pStream))
         return EAS_ERROR_NOT_VALID_IN_THIS_STATE;
-    return EAS_GetStreamParameter(pEASData, pStream, PARSER_DATA_FILE_TYPE, pFileType);
+    EAS_ISIZE value = 0;
+    EAS_RESULT result = EAS_GetStreamParameter(pEASData, pStream, PARSER_DATA_FILE_TYPE, &value);
+    *pFileType = value;
+    return result;
 }
 
 /*----------------------------------------------------------------------------
@@ -871,7 +881,7 @@ EAS_PUBLIC EAS_RESULT EAS_Render (EAS_DATA_HANDLE pEASData, EAS_PCM *pOut, EAS_I
     /* no support for other buffer sizes yet */
     if (numRequested != BUFFER_SIZE_IN_MONO_SAMPLES)
     {
-        { EAS_Report(_EAS_SEVERITY_ERROR, "This library supports only %ld samples in buffer, host requested %ld samples\n",
+        { EAS_Report(_EAS_SEVERITY_ERROR, "This library supports only %d samples in buffer, host requested %d samples\n",
             (EAS_I32) BUFFER_SIZE_IN_MONO_SAMPLES, numRequested); }
         return EAS_BUFFER_SIZE_MISMATCH;
     }
@@ -1247,7 +1257,7 @@ static EAS_RESULT EAS_ParseEvents (S_EAS_DATA *pEASData, EAS_HANDLE pStream, EAS
 {
     S_FILE_PARSER_INTERFACE *pParserModule;
     EAS_RESULT result;
-    EAS_I32 parserState;
+    EAS_STATE parserState;
     EAS_BOOL done;
     EAS_INT yieldCount = YIELD_EVENT_COUNT;
     EAS_U32 time = 0;
@@ -1459,7 +1469,7 @@ EAS_PUBLIC EAS_RESULT EAS_RegisterMetaDataCallback (
     metadata.buffer = metaDataBuffer;
     metadata.bufferSize = metaDataBufSize;
     metadata.pUserData = pUserData;
-    return EAS_SetStreamParameter(pEASData, pStream, PARSER_DATA_METADATA_CB, (EAS_I32) &metadata);
+    return EAS_SetStreamParameter(pEASData, pStream, PARSER_DATA_METADATA_CB, (EAS_ISIZE) &metadata);
 }
 
 /*----------------------------------------------------------------------------
@@ -1472,7 +1482,10 @@ EAS_PUBLIC EAS_RESULT EAS_GetNoteCount (EAS_DATA_HANDLE pEASData, EAS_HANDLE pSt
 {
     if (!EAS_StreamReady(pEASData, pStream))
         return EAS_ERROR_NOT_VALID_IN_THIS_STATE;
-    return EAS_IntGetStrmParam(pEASData, pStream, PARSER_DATA_NOTE_COUNT, pNoteCount);
+    EAS_ISIZE value = 0;
+    EAS_RESULT result = EAS_IntGetStrmParam(pEASData, pStream, PARSER_DATA_NOTE_COUNT, &value);
+    *pNoteCount = (EAS_I32) value;
+    return result;
 }
 
 /*----------------------------------------------------------------------------
@@ -1567,7 +1580,7 @@ EAS_PUBLIC EAS_RESULT EAS_OpenMIDIStream (EAS_DATA_HANDLE pEASData, EAS_HANDLE *
     /* use an existing synthesizer */
     else
     {
-        EAS_I32 value;
+        EAS_ISIZE value;
         result = EAS_GetStreamParameter(pEASData, streamHandle, PARSER_DATA_SYNTH_HANDLE, &value);
         pMIDIStream->pSynth = (S_SYNTH*) value;
         VMIncRefCount(pMIDIStream->pSynth);
@@ -1761,7 +1774,10 @@ EAS_PUBLIC EAS_RESULT EAS_GetPolyphony (EAS_DATA_HANDLE pEASData, EAS_HANDLE pSt
 {
     if (!EAS_StreamReady(pEASData, pStream))
         return EAS_ERROR_NOT_VALID_IN_THIS_STATE;
-    return EAS_IntGetStrmParam(pEASData, pStream, PARSER_DATA_POLYPHONY, pPolyphonyCount);
+    EAS_ISIZE value = 0;
+    EAS_RESULT result = EAS_IntGetStrmParam(pEASData, pStream, PARSER_DATA_POLYPHONY, &value);
+    *pPolyphonyCount = (EAS_I32) value;
+    return result;
 }
 
 /*----------------------------------------------------------------------------
@@ -1858,7 +1874,11 @@ EAS_PUBLIC EAS_RESULT EAS_GetPriority (EAS_DATA_HANDLE pEASData, EAS_HANDLE pStr
 {
     if (!EAS_StreamReady(pEASData, pStream))
         return EAS_ERROR_NOT_VALID_IN_THIS_STATE;
-    return EAS_IntGetStrmParam(pEASData, pStream, PARSER_DATA_PRIORITY, pPriority);
+
+    EAS_ISIZE value = 0;
+    EAS_RESULT result = EAS_IntGetStrmParam(pEASData, pStream, PARSER_DATA_PRIORITY, &value);
+    *pPriority = (EAS_I32) value;
+    return result;
 }
 
 /*----------------------------------------------------------------------------
@@ -1891,7 +1911,7 @@ EAS_PUBLIC EAS_RESULT EAS_SetVolume (EAS_DATA_HANDLE pEASData, EAS_HANDLE pStrea
     /* stream volume */
     if (pStream != NULL)
     {
-        EAS_I32 gainOffset;
+        EAS_ISIZE gainOffset;
         EAS_RESULT result;
 
         if (!EAS_StreamReady(pEASData, pStream))
@@ -2386,7 +2406,7 @@ EAS_PUBLIC EAS_RESULT EAS_SetSoundLibrary (EAS_DATA_HANDLE pEASData, EAS_HANDLE 
     {
         if (!EAS_StreamReady(pEASData, pStream))
             return EAS_ERROR_NOT_VALID_IN_THIS_STATE;
-        return EAS_IntSetStrmParam(pEASData, pStream, PARSER_DATA_EAS_LIBRARY, (EAS_I32) pSndLib);
+        return EAS_IntSetStrmParam(pEASData, pStream, PARSER_DATA_EAS_LIBRARY, (EAS_ISIZE) pSndLib);
     }
 
     return VMSetGlobalEASLib(pEASData->pVoiceMgr, pSndLib);
@@ -2476,7 +2496,7 @@ EAS_PUBLIC EAS_RESULT EAS_LoadDLSCollection (EAS_DATA_HANDLE pEASData, EAS_HANDL
 
         /* if a stream pStream is specified, point it to the DLS collection */
         if (pStream)
-            result = EAS_IntSetStrmParam(pEASData, pStream, PARSER_DATA_DLS_COLLECTION, (EAS_I32) pDLS);
+            result = EAS_IntSetStrmParam(pEASData, pStream, PARSER_DATA_DLS_COLLECTION, (EAS_ISIZE) pDLS);
 
         /* global DLS load */
         else
