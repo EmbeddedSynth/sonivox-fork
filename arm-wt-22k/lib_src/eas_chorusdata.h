@@ -82,6 +82,7 @@ typedef struct
     EAS_I16 m_nRate;
     EAS_I16 m_nDepth;
     EAS_I16 m_nLevel;
+    EAS_I16 m_nDry;
 
     //delay lines used by the chorus, longer would sound better
     EAS_PCM chorusDelayL[CHORUS_L_SIZE];

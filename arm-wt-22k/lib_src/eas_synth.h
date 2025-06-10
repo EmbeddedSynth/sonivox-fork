@@ -229,14 +229,6 @@ typedef struct s_synth_channel_tag
 
     EAS_U8      pool;               /* SPMIDI channel voice pool */
     EAS_U8      mip;                /* SPMIDI MIP setting */
-
-#ifdef  _REVERB
-    EAS_U8      reverbSend;         /* CC91 */
-#endif
-
-#ifdef  _CHORUS
-    EAS_U8      chorusSend;         /* CC93 */
-#endif
 } S_SYNTH_CHANNEL;
 
 /*------------------------------------
@@ -318,6 +310,10 @@ typedef struct s_synth_tag
     EAS_VOID_PTR            *pExtAudioInstData;
 #endif
 
+    // Moved from S_SYNTH_CHANNEL to here
+    // to improve caching
+    EAS_U8                  reverbSendLevels[NUM_SYNTH_CHANNELS]; // CC91
+    EAS_U8                  chorusSendLevels[NUM_SYNTH_CHANNELS]; // CC93
     S_SYNTH_CHANNEL         channels[NUM_SYNTH_CHANNELS];
     EAS_I32                 totalNoteCount;
     EAS_U16                 maxPolyphony;
@@ -331,6 +327,13 @@ typedef struct s_synth_tag
     EAS_U8                  vSynthNum;
     EAS_U8                  refCount;
     EAS_U8                  priority;
+
+#ifdef _CHORUS
+    EAS_BOOL                chorusEnabled;
+#endif
+#ifdef _REVERB
+    EAS_BOOL                reverbEnabled;
+#endif
 } S_SYNTH;
 
 /*------------------------------------
@@ -354,11 +357,13 @@ typedef struct s_voice_mgr_tag
 #endif
 
 #ifdef _REVERB
-    EAS_PCM                 reverbSendBuffer[NUM_OUTPUT_CHANNELS * SYNTH_UPDATE_PERIOD_IN_SAMPLES];
+    EAS_PCM                 reverbSendBuffer[NUM_OUTPUT_CHANNELS * BUFFER_SIZE_IN_MONO_SAMPLES];
+    EAS_VOID_PTR            reverbData;
 #endif
 
 #ifdef _CHORUS
-    EAS_PCM                 chorusSendBuffer[NUM_OUTPUT_CHANNELS * SYNTH_UPDATE_PERIOD_IN_SAMPLES];
+    EAS_PCM                 chorusSendBuffer[NUM_OUTPUT_CHANNELS * BUFFER_SIZE_IN_MONO_SAMPLES];
+    EAS_VOID_PTR            chorusData;
 #endif
     S_SYNTH_VOICE           voices[MAX_SYNTH_VOICES];
 

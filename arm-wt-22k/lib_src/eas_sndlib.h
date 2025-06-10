@@ -221,7 +221,7 @@ typedef struct s_wt_region_tag
 {
     S_REGION    region;
     EAS_I16     tuning;
-    EAS_I16     gain;
+    EAS_I16     gain; // DLS: (in centibels, or 0.1 dB); WT: EG1 (.15) frac
     EAS_U32     loopStart; // in samples
     EAS_U32     loopEnd; // in samples, past end
     EAS_U16     waveIndex;

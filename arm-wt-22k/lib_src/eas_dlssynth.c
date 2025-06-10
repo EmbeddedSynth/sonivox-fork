@@ -199,28 +199,21 @@ static EAS_I32 DLS_UpdateGain (S_WT_VOICE *pWTVoice, const S_DLS_ARTICULATION *p
 
     /* add total mod LFO effect */
     gain += FMUL_15x15(temp, pWTVoice->modLFO.lfoValue);
-    if (gain > 0)
-        gain = 0;
 
     /* convert to linear gain including EG1 */
-    if (pWTVoice->eg1State != eEnvelopeStateAttack)
+    // DAHDSR
+    // only attack is linear gain, others are in dB
+    if (pWTVoice->eg1State == eEnvelopeStateAttack)
     {
-        gain = (DLS_GAIN_FACTOR * gain) >> DLS_GAIN_SHIFT;
-        /*lint -e{702} use shift for performance */
-#if 1
-        gain += (pWTVoice->eg1Value - 32767) >> 1;
+        gain = (DLS_GAIN_FACTOR * gain) >> DLS_GAIN_FACTOR_FRAC_BITS;
         gain = EAS_LogToLinear16(gain);
-#else
-        gain = EAS_LogToLinear16(gain);
-        temp = EAS_LogToLinear16((pWTVoice->eg1Value - 32767) >> 1);
-        gain = FMUL_15x15(gain, temp);
-#endif
+        gain = FMUL_15x15(gain, pWTVoice->eg1Value);
     }
     else
     {
-        gain = (DLS_GAIN_FACTOR * gain) >> DLS_GAIN_SHIFT;
+        gain -= (SYNTH_FULL_SCALE_EG1_GAIN - pWTVoice->eg1Value) * 960 / (1 << NUM_EG1_FRAC_BITS); // full scale: 0dB, 0: -96dB
+        gain = (DLS_GAIN_FACTOR * gain) >> DLS_GAIN_FACTOR_FRAC_BITS;
         gain = EAS_LogToLinear16(gain);
-        gain = FMUL_15x15(gain, pWTVoice->eg1Value);
     }
 
     /* include MIDI channel gain */
@@ -438,6 +431,9 @@ EAS_BOOL DLS_UpdateVoice (S_VOICE_MGR *pVoiceMgr, S_SYNTH *pSynth, S_SYNTH_VOICE
     /* check for end of sample */
     if ((pWTVoice->loopStart != WT_NOISE_GENERATOR) && (pWTVoice->loopStart == pWTVoice->loopEnd))
         done = WT_CheckSampleEnd(pWTVoice, &intFrame, EAS_FALSE);
+
+    if (intFrame.numSamples < BUFFER_SIZE_IN_MONO_SAMPLES)
+        EAS_HWMemSet(pMixBuffer + intFrame.numSamples * NUM_OUTPUT_CHANNELS, 0, (BUFFER_SIZE_IN_MONO_SAMPLES - intFrame.numSamples) * NUM_OUTPUT_CHANNELS * sizeof(EAS_I32));
 
     WT_ProcessVoice(pWTVoice, &intFrame);
 

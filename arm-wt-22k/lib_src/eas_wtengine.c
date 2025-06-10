@@ -89,9 +89,7 @@ void WT_VoiceGain (S_WT_VOICE *pWTVoice, S_WT_INT_FRAME *pWTIntFrame)
     EAS_PCM *pInputBuffer;
     EAS_I32 gain;
     EAS_I32 gainIncrement;
-    EAS_I32 tmp0;
-    EAS_I32 tmp1;
-    EAS_I32 tmp2;
+    EAS_I32 smp;
     EAS_I32 numSamples;
 
 #if (NUM_OUTPUT_CHANNELS == 2)
@@ -106,7 +104,7 @@ void WT_VoiceGain (S_WT_VOICE *pWTVoice, S_WT_INT_FRAME *pWTIntFrame)
         android_errorWriteLog(0x534e4554, "26366256");
         return;
     } else if (numSamples > BUFFER_SIZE_IN_MONO_SAMPLES) {
-        EAS_Report(_EAS_SEVERITY_ERROR, "%s: numSamples %ld > %d BUFFER_SIZE_IN_MONO_SAMPLES\n", __func__, numSamples, BUFFER_SIZE_IN_MONO_SAMPLES);
+        EAS_Report(_EAS_SEVERITY_ERROR, "%s: numSamples %d > %d BUFFER_SIZE_IN_MONO_SAMPLES\n", __func__, numSamples, BUFFER_SIZE_IN_MONO_SAMPLES);
         ALOGE("b/317780080 clip numSamples %ld -> %d", numSamples, BUFFER_SIZE_IN_MONO_SAMPLES);
         android_errorWriteLog(0x534e4554, "317780080");
         numSamples = BUFFER_SIZE_IN_MONO_SAMPLES;
@@ -114,7 +112,8 @@ void WT_VoiceGain (S_WT_VOICE *pWTVoice, S_WT_INT_FRAME *pWTIntFrame)
     pMixBuffer = pWTIntFrame->pMixBuffer;
     pInputBuffer = pWTIntFrame->pAudioBuffer;
 
-    gainIncrement = (pWTIntFrame->frame.gainTarget - pWTIntFrame->prevGain) * (1 << (16 - SYNTH_UPDATE_PERIOD_IN_BITS));
+    gainIncrement = (pWTIntFrame->frame.gainTarget - pWTIntFrame->prevGain) * (1 << 16) / BUFFER_SIZE_IN_MONO_SAMPLES;
+    // EAS_Report(_EAS_SEVERITY_DETAIL, "%s: prevGain %ld, gainTarget %ld\n", __func__, (long)pWTIntFrame->prevGain, (long)pWTIntFrame->frame.gainTarget);
     if (gainIncrement < 0)
         gainIncrement++;
     gain = pWTIntFrame->prevGain * (1 << 16);
@@ -125,51 +124,23 @@ void WT_VoiceGain (S_WT_VOICE *pWTVoice, S_WT_INT_FRAME *pWTIntFrame)
 #endif
 
     while (numSamples--) {
-
         /* incremental gain step to prevent zipper noise */
-        tmp0 = *pInputBuffer++;
         gain += gainIncrement;
-        /*lint -e{704} <avoid divide>*/
-        tmp2 = gain >> 16;
-
-        /* scale sample by gain */
-        tmp2 *= tmp0;
-
+        smp = *pInputBuffer++;
+        
+        smp = FMUL_15x15(smp, gain / (1 << 16));
 
         /* stereo output */
 #if (NUM_OUTPUT_CHANNELS == 2)
-        /*lint -e{704} <avoid divide>*/
-        tmp2 = tmp2 >> 14;
-
-        /* get the current sample in the final mix buffer */
-        tmp1 = *pMixBuffer;
-
         /* left channel */
-        tmp0 = tmp2 * gainLeft;
-        /*lint -e{704} <avoid divide>*/
-        tmp0 = tmp0 >> NUM_MIXER_GUARD_BITS;
-        tmp1 += tmp0;
-        *pMixBuffer++ = tmp1;
-
-        /* get the current sample in the final mix buffer */
-        tmp1 = *pMixBuffer;
-
+        *pMixBuffer++ = MULT_EG1_EG1(smp, gainLeft);
         /* right channel */
-        tmp0 = tmp2 * gainRight;
-        /*lint -e{704} <avoid divide>*/
-        tmp0 = tmp0 >> NUM_MIXER_GUARD_BITS;
-        tmp1 += tmp0;
-        *pMixBuffer++ = tmp1;
-
-        /* mono output */
+        *pMixBuffer++ = MULT_EG1_EG1(smp, gainRight);
 #else
-
-        /* get the current sample in the final mix buffer */
-        tmp1 = *pMixBuffer;
+        /* mono output */
         /*lint -e{704} <avoid divide>*/
         tmp2 = tmp2 >> (NUM_MIXER_GUARD_BITS - 1);
-        tmp1 += tmp2;
-        *pMixBuffer++ = tmp1;
+        *pMixBuffer++ = tmp2;
 #endif
 
     }

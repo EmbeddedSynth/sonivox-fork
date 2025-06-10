@@ -148,11 +148,11 @@
 
 // #define _DEBUG_DLS
 
-#define DLS_MAX_WAVE_COUNT      2048
-#define DLS_MAX_ART_COUNT       4096
-#define DLS_MAX_REGION_COUNT    4096
+#define DLS_MAX_WAVE_COUNT      32767
+#define DLS_MAX_ART_COUNT       32767
+#define DLS_MAX_REGION_COUNT    32767
 #define DLS_MAX_INST_COUNT      512
-#define MAX_DLS_WAVE_SIZE       (1024*1024)
+#define MAX_DLS_WAVE_SIZE       (1024*1024*32) // 32 MiB
 
 #ifndef EAS_U32_MAX
 #define EAS_U32_MAX             (4294967295U)
@@ -520,7 +520,7 @@ EAS_RESULT DLSParser (EAS_HW_DATA_HANDLE hwInstData, EAS_FILE_HANDLE fileHandle,
         return result;
     if (temp != CHUNK_DLS)
     {
-        EAS_Report(_EAS_SEVERITY_ERROR, "Expected DLS chunk, got %08lx\n", temp);
+        EAS_Report(_EAS_SEVERITY_ERROR, "Expected DLS chunk, got %08x\n", temp);
         return EAS_ERROR_FILE_FORMAT;
     }
 
@@ -663,7 +663,7 @@ EAS_RESULT DLSParser (EAS_HW_DATA_HANDLE hwInstData, EAS_FILE_HANDLE fileHandle,
         dls.pDLS = EAS_HWMalloc(dls.hwInstData, size);
         if (dls.pDLS == NULL)
         {
-            EAS_Report(_EAS_SEVERITY_ERROR, "EAS_HWMalloc failed for DLS memory allocation size %ld\n", size);
+            EAS_Report(_EAS_SEVERITY_ERROR, "EAS_HWMalloc failed for DLS memory allocation size %d\n", size);
             EAS_HWFree(dls.hwInstData, dls.wsmpData);
             return EAS_ERROR_MALLOC_FAILED;
         }
@@ -988,6 +988,7 @@ static EAS_RESULT Parse_wave (SDLS_SYNTHESIZER_DATA *pDLSData, EAS_I32 pos, EAS_
     // limit to reasonable size
     if (dataSize < 0 || dataSize > MAX_DLS_WAVE_SIZE)
     {
+        EAS_Report(_EAS_SEVERITY_ERROR, "DLS wave chunk has invalid data size %d\n", dataSize);
         return EAS_ERROR_SOUND_LIBRARY;
     }
 
@@ -1144,11 +1145,6 @@ static EAS_RESULT Parse_wsmp (SDLS_SYNTHESIZER_DATA *pDLSData, EAS_I32 pos, S_WS
     /* get gain */
     if ((result = EAS_HWGetDWord(pDLSData->hwInstData, pDLSData->fileHandle, &p->gain, EAS_FALSE)) != EAS_SUCCESS)
         return result;
-    if (p->gain > 0)
-    {
-        EAS_Report(_EAS_SEVERITY_DETAIL, "Positive gain [%ld] in DLS wsmp ignored, set to 0dB\n", p->gain);
-        p->gain = 0;
-    }
 
     /* option flags */
     if ((result = EAS_HWGetDWord(pDLSData->hwInstData, pDLSData->fileHandle, &ltemp, EAS_FALSE)) != EAS_SUCCESS)

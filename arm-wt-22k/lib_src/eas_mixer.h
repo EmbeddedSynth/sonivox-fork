@@ -42,7 +42,7 @@
 
 extern void SynthMasterGain(EAS_I32 *pInputBuffer,
                             EAS_PCM *pOutputBuffer,
-                            EAS_U16 nGain,
+                            EAS_I32 nGain,
                             EAS_U16 nNumLoopSamples);
 
 /*----------------------------------------------------------------------------

@@ -158,18 +158,16 @@ EAS_U16 EAS_LogToLinear16 (EAS_I32 nGain)
  * volume - 100 = 0dB, 99 = -1dB, 0 = -inf
  *
  * Outputs:
- * Returns a 16-bit linear value
+ * Linear gain in EG1 frac, i.e. 1.0 for +0dB
  *----------------------------------------------------------------------------
 */
-EAS_I16 EAS_VolumeToGain (EAS_INT volume)
+EAS_I32 EAS_VolumeToGain (EAS_INT volume)
 {
     /* check for limits */
     if (volume <= 0)
         return 0;
-    if (volume >= 100)
-        return 0x7fff;
 
     /*lint -e{702} use shift instead of division */
-    return (EAS_I16) EAS_Calculate2toX((((volume - EAS_MAX_VOLUME) * 204099) >> 10) - 1);
+    return EAS_Calculate2toX((((volume - EAS_REF_VOLUME) * 204099) >> 10) - 1);
 }
 

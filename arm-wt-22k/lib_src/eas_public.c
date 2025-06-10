@@ -207,8 +207,19 @@ EAS_RESULT EAS_IntSetStrmParam (S_EAS_DATA *pEASData, EAS_HANDLE pStream, EAS_IN
             break;
 
         case PARSER_DATA_VOLUME:
-            VMSetVolume(pSynth, (EAS_U16) value);
+            VMSetVolume(pSynth, value);
             break;
+    
+#ifdef _CHORUS
+        case PARSER_DATA_CHORUS_ENABLED:
+            pSynth->chorusEnabled = (EAS_BOOL) value;
+            break;
+#endif
+#ifdef _REVERB  
+        case PARSER_DATA_REVERB_ENABLED:
+            pSynth->reverbEnabled = (EAS_BOOL) value;
+            break;
+#endif
 
         default:
             EAS_Report(_EAS_SEVERITY_ERROR, "Invalid paramter %d in call to EAS_IntSetStrmParam", param);
@@ -1902,13 +1913,14 @@ EAS_PUBLIC EAS_RESULT EAS_GetPriority (EAS_DATA_HANDLE pEASData, EAS_HANDLE pStr
 */
 EAS_PUBLIC EAS_RESULT EAS_SetVolume (EAS_DATA_HANDLE pEASData, EAS_HANDLE pStream, EAS_I32 volume)
 {
-    EAS_I16 gain;
+    EAS_I32 gain;
 
     /* check range */
     if ((volume < 0) || (volume > EAS_MAX_VOLUME))
         return EAS_ERROR_PARAMETER_RANGE;
 
     /* stream volume */
+    // TODO: I did not find any code uses stream volume
     if (pStream != NULL)
     {
         EAS_ISIZE gainOffset;

@@ -134,7 +134,7 @@ void EAS_MixEnginePrep (S_EAS_DATA *pEASData, EAS_I32 numSamples)
 */
 void EAS_MixEnginePost (S_EAS_DATA *pEASData, EAS_I32 numSamples)
 {
-    EAS_U16 gain;
+    EAS_I32 gain;
 
 //3 dls: Need to restore the mix engine metrics
 
@@ -153,19 +153,7 @@ void EAS_MixEnginePost (S_EAS_DATA *pEASData, EAS_I32 numSamples)
     else
         gain = (EAS_U16) pEASData->masterGain;
 #else
-    gain = (EAS_U16) pEASData->masterGain;
-#endif
-
-    /* Not using all the gain bits for now
-     * Reduce the input to the compressor by 6dB to prevent saturation
-     */
-#ifdef _COMPRESSOR_ENABLED
-    if (pEASData->effectsModules[EAS_MODULE_COMPRESSOR].effectData)
-        gain = gain >> 5;
-    else
-        gain = gain >> 4;
-#else
-    gain = gain >> 4;
+    gain = pEASData->masterGain;
 #endif
 
     /* convert 32-bit mix buffer to 16-bit output format */
@@ -265,32 +253,14 @@ void EAS_MixEnginePost (S_EAS_DATA *pEASData, EAS_I32 numSamples)
 */
 void SynthMasterGain(EAS_I32 *pInputBuffer,
                      EAS_PCM *pOutputBuffer,
-                     EAS_U16 nGain,
+                     EAS_I32 nGain,
                      EAS_U16 numSamples)
 {
     /* loop through the buffer */
     while (numSamples) {
-        EAS_I32 s;
-
+        EAS_I32 s = *pInputBuffer++;
+        *pOutputBuffer++ = (EAS_PCM)SATURATE(FMUL_15x15(s, nGain));
         numSamples--;
-        /* read a sample from the input buffer and add some guard bits */
-        s = *pInputBuffer++;
-
-        /* add some guard bits */
-        /*lint -e{704} <avoid divide for performance>*/
-        s = s >> 7;
-
-        /* apply master gain */
-        s *= (EAS_I32) nGain;
-
-        /* shift to lower 16-bits */
-        /*lint -e{704} <avoid divide for performance>*/
-        s = s >> 9;
-
-        /* saturate */
-        s = SATURATE(s);
-
-        *pOutputBuffer++ = (EAS_PCM)s;
     }
 }
 #endif

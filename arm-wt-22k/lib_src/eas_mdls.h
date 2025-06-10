@@ -163,10 +163,11 @@ typedef struct
  * 16-bits of the DLS gain value. The result is a 10-bit fraction
  * that works with the EAS_LogToLinear16 function.
  *
- * DLS_GAIN_FACTOR = (2^18) / (200 * log10(2))
+ * float(DLS_GAIN_FACTOR) = 1 / 200 * log10(2) * (1 << 10)
+ * DLS_GAIN_FACTOR = float(DLS_GAIN_FACTOR) * (1 << DLS_GAIN_FACTOR_FRAC_BITS)
  */
-#define DLS_GAIN_FACTOR         4354
-#define DLS_GAIN_SHIFT          8
+#define DLS_GAIN_FACTOR                    17416
+#define DLS_GAIN_FACTOR_FRAC_BITS          10
 
 /*
  * Reciprocal of 10 for quick divide by 10's

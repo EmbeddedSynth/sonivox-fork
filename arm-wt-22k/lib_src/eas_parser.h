@@ -58,8 +58,8 @@ typedef struct
     EAS_RESULT (* EAS_CONST pfPause)(struct s_eas_data_tag *pEASData, EAS_VOID_PTR pInstData);
     EAS_RESULT (* EAS_CONST pfResume)(struct s_eas_data_tag *pEASData, EAS_VOID_PTR pInstData);
     EAS_RESULT (* EAS_CONST pfLocate)(struct s_eas_data_tag *pEASData, EAS_VOID_PTR pInstData, EAS_I32 time, EAS_BOOL *pParserLocate);
-    EAS_RESULT (* EAS_CONST pfSetData)(struct s_eas_data_tag *pEASData, EAS_VOID_PTR pInstData, EAS_I32 param, EAS_I32 value);
-    EAS_RESULT (* EAS_CONST pfGetData)(struct s_eas_data_tag *pEASData, EAS_VOID_PTR pInstData, EAS_I32 param, EAS_I32 *pValue);
+    EAS_RESULT (* EAS_CONST pfSetData)(struct s_eas_data_tag *pEASData, EAS_VOID_PTR pInstData, EAS_I32 param, EAS_ISIZE value);
+    EAS_RESULT (* EAS_CONST pfGetData)(struct s_eas_data_tag *pEASData, EAS_VOID_PTR pInstData, EAS_I32 param, EAS_ISIZE *pValue);
     EAS_RESULT (* EAS_CONST pfGetMetaData)(struct s_eas_data_tag *pEASData, EAS_VOID_PTR pInstData, EAS_I32 *pMediaLength);
 } S_FILE_PARSER_INTERFACE;
 
@@ -92,7 +92,9 @@ typedef enum
     PARSER_DATA_NOTE_COUNT,
     PARSER_DATA_MAX_PCM_STREAMS,
     PARSER_DATA_GAIN_OFFSET,
-    PARSER_DATA_PLAY_MODE
+    PARSER_DATA_PLAY_MODE,
+    PARSER_DATA_CHORUS_ENABLED,
+    PARSER_DATA_REVERB_ENABLED
 } E_PARSER_DATA;
 
 #endif /* #ifndef _EAS_PARSER_H */

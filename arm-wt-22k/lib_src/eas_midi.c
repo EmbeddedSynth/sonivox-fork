@@ -450,7 +450,7 @@ static EAS_RESULT ProcessSysExMessage (S_EAS_DATA *pEASData, S_SYNTH *pSynth, S_
             {
                 EAS_I32 gain = ((EAS_I32) c << 8) | ((EAS_I32) pMIDIStream->d1 << 1);
                 gain = (gain * gain) >> 15;
-                VMSetVolume(pSynth, (EAS_U16) gain);
+                VMSetVolume(pSynth, gain);
             }
             pMIDIStream->sysExState = eSysExEOX;
             break;

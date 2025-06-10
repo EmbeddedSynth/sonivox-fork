@@ -319,7 +319,7 @@ the constant by NUM_EG1_FRAC_BITS
 
 #define SATURATE(x)                                                         \
     ((((int32_t)(x)) > DISTORTION_ONE)      ? (DISTORTION_ONE) :            \
-    (((int32_t)(x)) < DISTORTION_MINUS_ONE) ? (DISTORTION_MINUS_ONE) :  ((int32_t)(x)));
+    (((int32_t)(x)) < DISTORTION_MINUS_ONE) ? (DISTORTION_MINUS_ONE) :  ((int32_t)(x)))
 
 
 
@@ -375,7 +375,7 @@ EAS_U16 EAS_LogToLinear16 (EAS_I32 nGain);
  * Returns a 16-bit linear value
  *----------------------------------------------------------------------------
 */
-EAS_I16 EAS_VolumeToGain (EAS_INT volume);
+EAS_I32 EAS_VolumeToGain (EAS_INT volume);
 
 /*----------------------------------------------------------------------------
  * EAS_fsqrt()

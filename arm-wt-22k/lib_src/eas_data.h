@@ -84,7 +84,7 @@ typedef struct s_eas_stream_tag
 #define DEFAULT_STREAM_GAIN         14622
 
 /* 10 dB of boost available for individual parsers */
-#define STREAM_VOLUME_HEADROOM      10
+#define STREAM_VOLUME_HEADROOM      0
 
 /* amalgamated persistent data type */
 typedef struct s_eas_data_tag
@@ -123,7 +123,7 @@ typedef struct s_eas_data_tag
 #endif
 
     EAS_U32                         renderTime;
-    EAS_I16                         masterGain;
+    EAS_I32                         masterGain;
     EAS_U8                          masterVolume;
     EAS_BOOL8                       staticMemoryModel;
     EAS_BOOL8                       searchHeaderFlag;
