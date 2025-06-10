@@ -97,7 +97,8 @@ typedef enum
 #define PCM_FLAGS_STREAMING     0x80000000  /* streaming mode */
 
 /* maximum volume setting */
-#define EAS_MAX_VOLUME          100
+#define EAS_MAX_VOLUME          196
+#define EAS_REF_VOLUME          100
 
 /*----------------------------------------------------------------------------
  * EAS_Init()

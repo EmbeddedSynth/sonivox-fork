@@ -142,7 +142,8 @@ endif()
 configure_file(arm-wt-22k/host_src/eas_version.h.in libsonivox/eas_version.h @ONLY)
 
 list(APPEND HEADERS
-    ${CMAKE_CURRENT_BINARY_DIR}/libsonivox/eas.h
+    ${CMAKE_CURRENT_BINARY_DIR}/libsonivox/eas_version.h
+    arm-wt-22k/host_src/eas.h
     arm-wt-22k/host_src/eas_chorus.h
     arm-wt-22k/host_src/eas_reverb.h
     arm-wt-22k/host_src/eas_types.h
