@@ -474,10 +474,10 @@ EAS_BOOL WT_CheckSampleEnd (S_WT_VOICE *pWTVoice, S_WT_INT_FRAME *pWTIntFrame, E
             EAS_I32 oldMethod = 1 + (numSamples / pWTIntFrame->frame.phaseIncrement);
             pWTIntFrame->numSamples =
                 (numSamples + pWTIntFrame->frame.phaseIncrement - 1) / pWTIntFrame->frame.phaseIncrement;
-            if (oldMethod != pWTIntFrame->numSamples) {
-                ALOGE("b/317780080 old %ld new %ld", oldMethod, pWTIntFrame->numSamples);
-                EAS_Report(_EAS_SEVERITY_DETAIL, "%s: old %d new %d\n", __func__, oldMethod, pWTIntFrame->numSamples);
-            }
+            // if (oldMethod != pWTIntFrame->numSamples) {
+            //     ALOGE("b/317780080 old %ld new %ld", oldMethod, pWTIntFrame->numSamples);
+            //     EAS_Report(_EAS_SEVERITY_DETAIL, "%s: old %d new %d\n", __func__, oldMethod, pWTIntFrame->numSamples);
+            // }
         } else {
             pWTIntFrame->numSamples = numSamples;
         }
