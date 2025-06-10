@@ -58,6 +58,9 @@ typedef struct
 extern void EAS_ReportEx (int severity, unsigned long hashCode, int serialNum, ...);
 
 /* these prototypes are used if the debug preprocessor is not used */
+#if defined (__GNUC__) || defined (__clang__)
+__attribute__((format(printf, 2, 3)))
+#endif
 extern void EAS_Report (int severity, const char* fmt, ...);
 extern void EAS_ReportX (int severity, const char* fmt, ...);
 

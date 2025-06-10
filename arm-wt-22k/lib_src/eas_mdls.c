@@ -1163,7 +1163,7 @@ static EAS_RESULT Parse_wsmp (SDLS_SYNTHESIZER_DATA *pDLSData, EAS_I32 pos, S_WS
     {
 
         if (ltemp > 1)
-            EAS_Report(_EAS_SEVERITY_WARNING, "DLS sample with %lu loops, ignoring extra loops\n", ltemp);
+            EAS_Report(_EAS_SEVERITY_WARNING, "DLS sample with %u loops, ignoring extra loops\n", ltemp);
 
         /* skip ahead to loop data */
         if ((result = EAS_HWFileSeek(pDLSData->hwInstData, pDLSData->fileHandle, pos + (EAS_I32) cbSize)) != EAS_SUCCESS)
@@ -1756,7 +1756,7 @@ static EAS_RESULT Parse_insh (SDLS_SYNTHESIZER_DATA *pDLSData, EAS_I32 pos, EAS_
     /* verify the parameters are valid */
     if (bank & 0x7fff8080)
     {
-        EAS_Report(_EAS_SEVERITY_WARNING, "DLS bank number is out of range: %08lx\n", bank);
+        EAS_Report(_EAS_SEVERITY_WARNING, "DLS bank number is out of range: %08x\n", bank);
     }
     if (bank & 0x80000000u)
     {
@@ -1771,7 +1771,7 @@ static EAS_RESULT Parse_insh (SDLS_SYNTHESIZER_DATA *pDLSData, EAS_I32 pos, EAS_
     }
     if (program > 127)
     {
-        EAS_Report(_EAS_SEVERITY_WARNING, "DLS program number is out of range: %08lx\n", program);
+        EAS_Report(_EAS_SEVERITY_WARNING, "DLS program number is out of range: %08x\n", program);
         program &= 0x7f;
     }
 

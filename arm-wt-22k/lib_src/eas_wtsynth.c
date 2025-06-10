@@ -476,7 +476,7 @@ EAS_BOOL WT_CheckSampleEnd (S_WT_VOICE *pWTVoice, S_WT_INT_FRAME *pWTIntFrame, E
                 (numSamples + pWTIntFrame->frame.phaseIncrement - 1) / pWTIntFrame->frame.phaseIncrement;
             if (oldMethod != pWTIntFrame->numSamples) {
                 ALOGE("b/317780080 old %ld new %ld", oldMethod, pWTIntFrame->numSamples);
-                EAS_Report(_EAS_SEVERITY_DETAIL, "%s: old %ld new %ld\n", __func__, oldMethod, pWTIntFrame->numSamples);
+                EAS_Report(_EAS_SEVERITY_DETAIL, "%s: old %d new %d\n", __func__, oldMethod, pWTIntFrame->numSamples);
             }
         } else {
             pWTIntFrame->numSamples = numSamples;
@@ -487,7 +487,7 @@ EAS_BOOL WT_CheckSampleEnd (S_WT_VOICE *pWTVoice, S_WT_INT_FRAME *pWTIntFrame, E
             android_errorWriteLog(0x534e4554, "26366256");
             pWTIntFrame->numSamples = 0;
         } else if (pWTIntFrame->numSamples > BUFFER_SIZE_IN_MONO_SAMPLES) {
-            EAS_Report(_EAS_SEVERITY_ERROR, "%s: numSamples %ld > %d BUFFER_SIZE_IN_MONO_SAMPLES\n", __func__, pWTIntFrame->numSamples, BUFFER_SIZE_IN_MONO_SAMPLES);
+            EAS_Report(_EAS_SEVERITY_ERROR, "%s: numSamples %d > %d BUFFER_SIZE_IN_MONO_SAMPLES\n", __func__, pWTIntFrame->numSamples, BUFFER_SIZE_IN_MONO_SAMPLES);
             ALOGE("b/317780080 clip numSamples %ld -> %d",
                   pWTIntFrame->numSamples, BUFFER_SIZE_IN_MONO_SAMPLES);
             android_errorWriteLog(0x534e4554, "317780080");
@@ -526,7 +526,7 @@ EAS_BOOL WT_CheckSampleEnd (S_WT_VOICE *pWTVoice, S_WT_INT_FRAME *pWTIntFrame, E
  *
  *----------------------------------------------------------------------------
 */
-static EAS_BOOL WT_UpdateVoice (S_VOICE_MGR *pVoiceMgr, S_SYNTH *pSynth, S_SYNTH_VOICE *pVoice, EAS_I32 voiceNum, EAS_I32 *pMixBuffer, EAS_I32  numSamples)
+static EAS_BOOL WT_UpdateVoice (S_VOICE_MGR *pVoiceMgr, S_SYNTH *pSynth, S_SYNTH_VOICE *pVoice, EAS_I32 voiceNum, EAS_I32 *pMixBuffer, EAS_I32 numSamples)
 {
     S_WT_VOICE *pWTVoice;
     S_WT_INT_FRAME intFrame;
@@ -603,6 +603,9 @@ static EAS_BOOL WT_UpdateVoice (S_VOICE_MGR *pVoiceMgr, S_SYNTH *pSynth, S_SYNTH
 
     if (intFrame.numSamples > BUFFER_SIZE_IN_MONO_SAMPLES)
         intFrame.numSamples = BUFFER_SIZE_IN_MONO_SAMPLES;
+
+    if (intFrame.numSamples < BUFFER_SIZE_IN_MONO_SAMPLES)
+        EAS_HWMemSet(pMixBuffer + intFrame.numSamples * NUM_OUTPUT_CHANNELS, 0, (BUFFER_SIZE_IN_MONO_SAMPLES - intFrame.numSamples) * NUM_OUTPUT_CHANNELS * sizeof(EAS_I32));
 
 #ifdef EAS_SPLIT_WT_SYNTH
     if (voiceNum < NUM_PRIMARY_VOICES)
