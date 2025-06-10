@@ -384,7 +384,7 @@ EAS_RESULT SMF_Event (S_EAS_DATA *pEASData, EAS_VOID_PTR pInstData, EAS_INT pars
  *----------------------------------------------------------------------------
 */
 /*lint -esym(715, pEASData) reserved for future use */
-EAS_RESULT SMF_State (S_EAS_DATA *pEASData, EAS_VOID_PTR pInstData, EAS_ISIZE *pState)
+EAS_RESULT SMF_State (S_EAS_DATA *pEASData, EAS_VOID_PTR pInstData, EAS_STATE *pState)
 {
     S_SMF_DATA* pSMFData;
 
