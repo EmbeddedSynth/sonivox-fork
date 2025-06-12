@@ -287,7 +287,7 @@ int renderFile(const char *fileName)
     mPCMBufferSize = sizeof(EAS_PCM) * mEASConfig->mixBufferSize * mEASConfig->numChannels;
     mAudioBuffer = alloca(mPCMBufferSize);
     if (mAudioBuffer == NULL) {
-        fprintf(stderr, "Failed to allocate memory of size: %ld", mPCMBufferSize);
+        fprintf(stderr, "Failed to allocate memory of size: %d", mPCMBufferSize);
         ok = EXIT_FAILURE;
         goto cleanup;
     }
@@ -315,7 +315,7 @@ int renderFile(const char *fileName)
         }
 
         if (count != mEASConfig->mixBufferSize) {
-            fprintf(stderr, "Only %ld out of %ld frames rendered\n", count, mEASConfig->mixBufferSize);
+            fprintf(stderr, "Only %d out of %d frames rendered\n", count, mEASConfig->mixBufferSize);
             ok = EXIT_FAILURE;
             break;
         }
@@ -401,42 +401,42 @@ int main (int argc, char **argv)
         case 'r':
             reverb_type = atoi(optarg);
             if ((reverb_type < 0) || (reverb_type > 4)) {
-                fprintf (stderr, "invalid reverb preset: %ld\n", reverb_type);
+                fprintf (stderr, "invalid reverb preset: %d\n", reverb_type);
                 return EXIT_FAILURE;
             }
             break;
         case 'w':
             reverb_wet = atoi(optarg);
             if ((reverb_wet < 0) || (reverb_wet > 32767)) {
-                fprintf (stderr, "invalid reverb wet: %ld\n", reverb_wet);
+                fprintf (stderr, "invalid reverb wet: %d\n", reverb_wet);
                 return EXIT_FAILURE;
             }
             break;
         case 'n':
             reverb_dry = atoi(optarg);
             if ((reverb_dry < 0) || (reverb_dry > 32767)) {
-                fprintf (stderr, "invalid reverb dry: %ld\n", reverb_dry);
+                fprintf (stderr, "invalid reverb dry: %d\n", reverb_dry);
                 return EXIT_FAILURE;
             }
             break;
         case 'c':
             chorus_type = atoi(optarg);
             if ((chorus_type < 0) || (chorus_type > 4)) {
-                fprintf (stderr, "invalid chorus preset: %ld\n", chorus_type);
+                fprintf (stderr, "invalid chorus preset: %d\n", chorus_type);
                 return EXIT_FAILURE;
             }
             break;
         case 'l':
             chorus_level = atoi(optarg);
             if ((chorus_level < 0) || (chorus_level > 32767)) {
-                fprintf (stderr, "invalid chorus level: %ld\n", chorus_level);
+                fprintf (stderr, "invalid chorus level: %d\n", chorus_level);
                 return EXIT_FAILURE;
             }
             break;
         case 'g':
             playback_gain = atoi(optarg);
-            if ((playback_gain < 0) || (playback_gain > 100)) {
-                fprintf (stderr, "invalid playback gain: %ld\n", playback_gain);
+            if ((playback_gain < 0) || (playback_gain > EAS_MAX_VOLUME)) {
+                fprintf (stderr, "invalid playback gain: %d\n", playback_gain);
                 return EXIT_FAILURE;
             }
             break;
