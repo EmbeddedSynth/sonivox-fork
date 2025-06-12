@@ -352,7 +352,7 @@ static EAS_RESULT XMF_Event (S_EAS_DATA *pEASData, EAS_VOID_PTR pInstData, EAS_I
  *
  *----------------------------------------------------------------------------
 */
-static EAS_RESULT XMF_State (S_EAS_DATA *pEASData, EAS_VOID_PTR pInstData, EAS_RESULT *pState)
+static EAS_RESULT XMF_State (S_EAS_DATA *pEASData, EAS_VOID_PTR pInstData, EAS_STATE *pState)
 {
     return SMF_State(pEASData, ((S_XMF_DATA*) pInstData)->pSMFData, pState);
 }

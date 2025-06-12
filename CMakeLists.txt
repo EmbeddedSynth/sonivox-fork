@@ -204,7 +204,7 @@ target_include_directories( sonivox-objects PRIVATE
     fakes
 )
 
-if (CMAKE_COMPILER_IS_GNUCC)
+if (CMAKE_C_COMPILER_ID MATCHES "Clang|AppleClang|GNU")
     target_compile_options( sonivox-objects PRIVATE
         -Wno-unused-parameter
         -Wno-unused-value
@@ -212,6 +212,7 @@ if (CMAKE_COMPILER_IS_GNUCC)
         -Wno-unused-function
         -Wno-misleading-indentation
         -Wno-attributes
+        -Wformat
     )
 endif()
 
