@@ -85,7 +85,7 @@ typedef long EAS_RESULT;
 #define EAS_STREAM_BUFFERING                4
 #define EAS_BUFFER_FULL                     5
 
-typedef uint64_t EAS_STATE;
+typedef long EAS_STATE;
 typedef enum
 {
     EAS_STATE_READY = 0,
