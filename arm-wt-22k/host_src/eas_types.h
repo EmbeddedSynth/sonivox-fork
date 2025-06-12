@@ -85,12 +85,7 @@ typedef long EAS_RESULT;
 #define EAS_STREAM_BUFFERING                4
 #define EAS_BUFFER_FULL                     5
 
-/* EAS_STATE return codes */
-#if defined(_WIN64)
-typedef long long EAS_STATE;
-#else
-typedef long EAS_STATE;
-#endif
+typedef uint64_t EAS_STATE;
 typedef enum
 {
     EAS_STATE_READY = 0,
@@ -116,26 +111,21 @@ typedef enum
 
 /* boolean values */
 typedef unsigned EAS_BOOL;
-typedef unsigned char EAS_BOOL8;
+typedef uint8_t EAS_BOOL8;
 
 #define EAS_FALSE   0
 #define EAS_TRUE    1
 
 /* scalar variable definitions */
-typedef unsigned char EAS_U8;
-typedef signed char EAS_I8;
+typedef uint8_t EAS_U8;
+typedef int8_t EAS_I8;
 typedef char EAS_CHAR;
 
-typedef unsigned short EAS_U16;
-typedef short EAS_I16;
+typedef uint16_t EAS_U16;
+typedef int16_t EAS_I16;
 
-#if defined(_WIN64)
-typedef unsigned long long EAS_U32;
-typedef long long EAS_I32;
-#else
-typedef unsigned EAS_U32;
-typedef int EAS_I32;
-#endif
+typedef uint32_t EAS_U32;
+typedef int32_t EAS_I32;
 
 typedef unsigned EAS_UINT;
 typedef int EAS_INT;
