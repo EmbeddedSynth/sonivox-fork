@@ -2939,7 +2939,7 @@ EAS_I32 VMAddSamples (S_VOICE_MGR *pVoiceMgr, EAS_I32 *pMixBuffer, EAS_I32 numSa
     EAS_BOOL reverbProcess = EAS_FALSE;
     EAS_BOOL chorusProcess = EAS_FALSE;
 
-    
+    EAS_U16 sendLevel;
 
 #ifdef _CHORUS
     EAS_HWMemSet(pVoiceMgr->chorusSendBuffer, 0, sizeof(pVoiceMgr->chorusSendBuffer));
@@ -2952,17 +2952,18 @@ EAS_I32 VMAddSamples (S_VOICE_MGR *pVoiceMgr, EAS_I32 *pMixBuffer, EAS_I32 numSa
     voicesRendered = 0;
     for (voiceNum = 0; voiceNum < MAX_SYNTH_VOICES; voiceNum++)
     {
-        const EAS_U8 channel = pVoiceMgr->voices[voiceNum].channel;
+        S_SYNTH_VOICE* pSynthVoice = &pVoiceMgr->voices[voiceNum];
+        const EAS_U8 channel = pSynthVoice->channel;
 
         /* retarget stolen voices */
-        if ((pVoiceMgr->voices[voiceNum].voiceState == eVoiceStateStolen) && (pVoiceMgr->voices[voiceNum].gain <= 0))
+        if ((pSynthVoice->voiceState == eVoiceStateStolen) && (pSynthVoice->gain <= 0))
             VMRetargetStolenVoice(pVoiceMgr, voiceNum);
 
         /* get pointer to virtual synth */
         pSynth = pVoiceMgr->pSynth[channel >> 4];
 
         /* synthesize active voices */
-        if (pVoiceMgr->voices[voiceNum].voiceState != eVoiceStateFree)
+        if (pSynthVoice->voiceState != eVoiceStateFree)
         {
             done = GetSynthPtr(voiceNum)->pfUpdateVoice(pVoiceMgr, pSynth, &pVoiceMgr->voices[voiceNum], GetAdjustedVoiceNum(voiceNum), synthBuffer, numSamples);
             voicesRendered++;
@@ -2970,22 +2971,38 @@ EAS_I32 VMAddSamples (S_VOICE_MGR *pVoiceMgr, EAS_I32 *pMixBuffer, EAS_I32 numSa
             // add the samples to the mix buffer and reverb and chorus buffer
             for (EAS_INT i = 0; i < numSamples * NUM_OUTPUT_CHANNELS; i++) {
                 pMixBuffer[i] += synthBuffer[i];
+
                 // these effect modules have 16bit IO
 #ifdef _REVERB
-                if (pSynth->reverbEnabled && pSynth->reverbSendLevels[channel & 15] != 0) {
-                    pVoiceMgr->reverbSendBuffer[i] += 
-                        synthBuffer[i]
-                        * pSynth->reverbSendLevels[channel & 15] / 127
-                    ;
+#if defined(DLS_SYNTHESIZER)
+                if (pSynthVoice->regionIndex & FLAG_RGN_IDX_DLS_SYNTH) {
+                    const S_DLS_ARTICULATION* pDLSArt = &pSynth->pDLS->pDLSArticulations[pVoiceMgr->wtVoices[voiceNum].artIndex];
+                    sendLevel = pDLSArt->reverbSend * 128 / 1000;
+                    sendLevel += pSynth->reverbSendLevels[channel & 15] * pDLSArt->cc91ToReverbSend / 1000;
+                } else 
+#endif
+                {
+                    sendLevel = pSynth->reverbSendLevels[channel & 15];
+                }
+                if (pSynth->reverbEnabled && sendLevel != 0) {
+                    pVoiceMgr->reverbSendBuffer[i] += synthBuffer[i] * sendLevel / 128;
                     reverbProcess = EAS_TRUE;
                 }
 #endif
+
 #ifdef _CHORUS
-                if (pSynth->chorusEnabled && pSynth->chorusSendLevels[channel & 15] != 0) {
-                    pVoiceMgr->chorusSendBuffer[i] += 
-                        synthBuffer[i]
-                        * pSynth->chorusSendLevels[channel & 15] / 127
-                    ;
+#if defined(DLS_SYNTHESIZER)
+                if (pSynthVoice->regionIndex & FLAG_RGN_IDX_DLS_SYNTH) {
+                    const S_DLS_ARTICULATION* pDLSArt = &pSynth->pDLS->pDLSArticulations[pVoiceMgr->wtVoices[voiceNum].artIndex];
+                    sendLevel = pDLSArt->chorusSend * 128 / 1000;
+                    sendLevel += pSynth->chorusSendLevels[channel & 15] * pDLSArt->cc93ToChorusSend / 1000;
+                } else 
+#endif
+                {
+                    sendLevel = pSynth->chorusSendLevels[channel & 15];
+                }
+                if (pSynth->chorusEnabled && sendLevel != 0) {
+                    pVoiceMgr->chorusSendBuffer[i] += synthBuffer[i] * sendLevel / 128;
                     chorusProcess = EAS_TRUE;
                 }
 #endif
@@ -2995,8 +3012,8 @@ EAS_I32 VMAddSamples (S_VOICE_MGR *pVoiceMgr, EAS_I32 *pMixBuffer, EAS_I32 numSa
             if (done == EAS_TRUE)
             {
                 /* set gain of stolen voice to zero so it will be restarted */
-                if (pVoiceMgr->voices[voiceNum].voiceState == eVoiceStateStolen)
-                    pVoiceMgr->voices[voiceNum].gain = 0;
+                if (pSynthVoice->voiceState == eVoiceStateStolen)
+                    pSynthVoice->gain = 0;
 
                 /* or return it to the free voice pool */
                 else
@@ -3004,15 +3021,15 @@ EAS_I32 VMAddSamples (S_VOICE_MGR *pVoiceMgr, EAS_I32 *pMixBuffer, EAS_I32 numSa
             }
 
             /* if this voice is scheduled to be muted, set the mute flag */
-            if (pVoiceMgr->voices[voiceNum].voiceFlags & VOICE_FLAG_DEFER_MUTE)
+            if (pSynthVoice->voiceFlags & VOICE_FLAG_DEFER_MUTE)
             {
-                pVoiceMgr->voices[voiceNum].voiceFlags &= ~(VOICE_FLAG_DEFER_MUTE | VOICE_FLAG_DEFER_MIDI_NOTE_OFF);
+                pSynthVoice->voiceFlags &= ~(VOICE_FLAG_DEFER_MUTE | VOICE_FLAG_DEFER_MIDI_NOTE_OFF);
                 VMMuteVoice(pVoiceMgr, voiceNum);
             }
 
             /* if voice just started, advance state to play */
-            if (pVoiceMgr->voices[voiceNum].voiceState == eVoiceStateStart)
-                pVoiceMgr->voices[voiceNum].voiceState = eVoiceStatePlay;
+            if (pSynthVoice->voiceState == eVoiceStateStart)
+                pSynthVoice->voiceState = eVoiceStatePlay;
         }
     }
 

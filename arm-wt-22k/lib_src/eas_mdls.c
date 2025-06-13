@@ -392,10 +392,10 @@ static const S_DLS_ART_VALUES defaultArt =
     0,              /* Mod EG to pitch: 0 cents */
 
     0,              /* Default pan: 0.0% */
-    0,              /* Default reverb send: 0.0% */
     1000,           /* Default CC91 to reverb send: 100.0% */
+    0,              /* Default reverb send: 0.0% */
+    1000,           /* Default CC93 to chorus send: 100.0% */
     0,              /* Default chorus send: 0.0% */
-    1000            /* Default CC93 to chorus send: 100.0% */
     }
 };
 
