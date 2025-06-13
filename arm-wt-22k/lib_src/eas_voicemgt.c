@@ -43,18 +43,18 @@
 #include "eas_mdls.h"
 #endif
 
-#ifdef _REVERB
+#ifdef _CC_REVERB
 #include "eas_reverb.h"
 #include "eas_reverbdata.h"
 extern const S_EFFECTS_INTERFACE EAS_Reverb;
 #endif
-#ifdef _CHORUS
+#ifdef _CC_CHORUS
 #include "eas_chorus.h"
 #include "eas_chorusdata.h"
 extern const S_EFFECTS_INTERFACE EAS_Chorus;
 #endif
 
-#if (defined (_CHORUS) || defined (_REVERB)) && defined (_STATIC_MEMORY)
+#if (defined (_CC_CHORUS) || defined (_CC_REVERB)) && defined (_STATIC_MEMORY)
 #error "Chorus and Reverb send require dynamic memory model"
 #endif
 
@@ -325,7 +325,7 @@ EAS_RESULT VMInitialize (S_EAS_DATA *pEASData)
     pSecondarySynth->pfInitialize(pVoiceMgr);
 #endif
 
-#ifdef _CHORUS
+#ifdef _CC_CHORUS
     result = EAS_Chorus.pfInit(pEASData, &pVoiceMgr->chorusData);
     if (result != EAS_SUCCESS) {
         EAS_Report(_EAS_SEVERITY_FATAL, "VMInitialize: EAS_Chorus.pfInit returned %ld\n", result);
@@ -336,7 +336,7 @@ EAS_RESULT VMInitialize (S_EAS_DATA *pEASData)
     EAS_Chorus.pFSetParam(pVoiceMgr->chorusData, EAS_PARAM_CHORUS_LEVEL, EAS_CHORUS_LEVEL_MAX);
 #endif
 
-#ifdef _REVERB
+#ifdef _CC_REVERB
     result = EAS_Reverb.pfInit(pEASData, &pVoiceMgr->reverbData);
     if (result != EAS_SUCCESS) {
         EAS_Report(_EAS_SEVERITY_FATAL, "VMInitialize: EAS_Reverb.pfInit returned %ld\n", result);
@@ -436,10 +436,10 @@ EAS_RESULT VMInitMIDI (S_EAS_DATA *pEASData, S_SYNTH **ppSynth)
     pSynth->priority = DEFAULT_SYNTH_PRIORITY;
     pSynth->poolAlloc[0] = (EAS_U8) pEASData->pVoiceMgr->maxPolyphony;
 
-#ifdef _REVERB
+#ifdef _CC_REVERB
     pSynth->reverbEnabled = EAS_TRUE;
 #endif
-#ifdef _CHORUS
+#ifdef _CC_CHORUS
     pSynth->chorusEnabled = EAS_TRUE;
 #endif
 
@@ -605,11 +605,11 @@ void VMResetControllers (S_SYNTH *pSynth)
         pChannel->pan = DEFAULT_PAN;
         pChannel->expression = DEFAULT_EXPRESSION;
 
-#ifdef  _REVERB
+#ifdef  _CC_REVERB
         pSynth->reverbSendLevels[i] = DEFAULT_REVERB_SEND;
 #endif
 
-#ifdef  _CHORUS
+#ifdef  _CC_CHORUS
         pSynth->chorusSendLevels[i] = DEFAULT_CHORUS_SEND;
 #endif
 
@@ -2370,13 +2370,13 @@ void VMControlChange (S_VOICE_MGR *pVoiceMgr, S_SYNTH *pSynth, EAS_U8 channel, E
         }
 
         break;
-#ifdef _REVERB
+#ifdef _CC_REVERB
     case MIDI_CONTROLLER_REVERB_SEND:
         /* we treat send as a 7-bit controller and only use the MSB */
         pSynth->reverbSendLevels[channel] = value;
         break;
 #endif
-#ifdef _CHORUS
+#ifdef _CC_CHORUS
     case MIDI_CONTROLLER_CHORUS_SEND:
         /* we treat send as a 7-bit controller and only use the MSB */
         pSynth->chorusSendLevels[channel] = value;
@@ -2941,11 +2941,11 @@ EAS_I32 VMAddSamples (S_VOICE_MGR *pVoiceMgr, EAS_I32 *pMixBuffer, EAS_I32 numSa
 
     EAS_U16 sendLevel;
 
-#ifdef _CHORUS
+#ifdef _CC_CHORUS
     EAS_HWMemSet(pVoiceMgr->chorusSendBuffer, 0, sizeof(pVoiceMgr->chorusSendBuffer));
 #endif
 
-#ifdef _REVERB
+#ifdef _CC_REVERB
     EAS_HWMemSet(pVoiceMgr->reverbSendBuffer, 0, sizeof(pVoiceMgr->reverbSendBuffer));
 #endif
 
@@ -2973,7 +2973,7 @@ EAS_I32 VMAddSamples (S_VOICE_MGR *pVoiceMgr, EAS_I32 *pMixBuffer, EAS_I32 numSa
                 pMixBuffer[i] += synthBuffer[i];
 
                 // these effect modules have 16bit IO
-#ifdef _REVERB
+#ifdef _CC_REVERB
 #if defined(DLS_SYNTHESIZER)
                 if (pSynthVoice->regionIndex & FLAG_RGN_IDX_DLS_SYNTH) {
                     const S_DLS_ARTICULATION* pDLSArt = &pSynth->pDLS->pDLSArticulations[pVoiceMgr->wtVoices[voiceNum].artIndex];
@@ -2990,7 +2990,7 @@ EAS_I32 VMAddSamples (S_VOICE_MGR *pVoiceMgr, EAS_I32 *pMixBuffer, EAS_I32 numSa
                 }
 #endif
 
-#ifdef _CHORUS
+#ifdef _CC_CHORUS
 #if defined(DLS_SYNTHESIZER)
                 if (pSynthVoice->regionIndex & FLAG_RGN_IDX_DLS_SYNTH) {
                     const S_DLS_ARTICULATION* pDLSArt = &pSynth->pDLS->pDLSArticulations[pVoiceMgr->wtVoices[voiceNum].artIndex];
@@ -3033,7 +3033,7 @@ EAS_I32 VMAddSamples (S_VOICE_MGR *pVoiceMgr, EAS_I32 *pMixBuffer, EAS_I32 numSa
         }
     }
 
-#if defined (_CHORUS)
+#if defined (_CC_CHORUS)
     if (chorusProcess) {
         EAS_Chorus.pfProcess(pVoiceMgr->chorusData, pVoiceMgr->chorusSendBuffer, pVoiceMgr->chorusSendBuffer, numSamples);
         for (EAS_INT i = 0; i < numSamples * NUM_OUTPUT_CHANNELS; i++) {
@@ -3043,7 +3043,7 @@ EAS_I32 VMAddSamples (S_VOICE_MGR *pVoiceMgr, EAS_I32 *pMixBuffer, EAS_I32 numSa
 #endif
     // GM2 specification says there is a connection from chorus output to reverb send
     // but where is its CC controller
-#if defined (_REVERB)
+#if defined (_CC_REVERB)
     if (reverbProcess) {
         EAS_Reverb.pfProcess(pVoiceMgr->reverbData, pVoiceMgr->reverbSendBuffer, pVoiceMgr->reverbSendBuffer, numSamples);
         for (EAS_INT i = 0; i < numSamples * NUM_OUTPUT_CHANNELS; i++) {
@@ -3953,11 +3953,11 @@ void VMShutdown (S_EAS_DATA *pEASData)
     }
 #endif
 
-#ifdef _CHORUS
+#ifdef _CC_CHORUS
     EAS_Chorus.pfShutdown(pEASData, pEASData->pVoiceMgr->chorusData);
 #endif
 
-#ifdef _REVERB
+#ifdef _CC_REVERB
     EAS_Reverb.pfShutdown(pEASData, pEASData->pVoiceMgr->reverbData);
 #endif
 

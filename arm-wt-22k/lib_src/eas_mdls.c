@@ -2701,12 +2701,12 @@ static void Convert_art (SDLS_SYNTHESIZER_DATA *pDLSData, const S_DLS_ART_VALUES
     if (pDLSArt->values[PARAM_VEL_TO_GAIN] != 0)
         pArt->filterQandFlags |= FLAG_DLS_VELOCITY_SENSITIVE;
 
-#ifdef _REVERB
+#ifdef _CC_REVERB
     pArt->reverbSend = pDLSArt->values[PARAM_DEFAULT_REVERB_SEND];
     pArt->cc91ToReverbSend = pDLSArt->values[PARAM_MIDI_CC91_TO_REVERB_SEND];
 #endif
 
-#ifdef _CHORUS
+#ifdef _CC_CHORUS
     pArt->chorusSend = pDLSArt->values[PARAM_DEFAULT_CHORUS_SEND];
     pArt->cc93ToChorusSend = pDLSArt->values[PARAM_MIDI_CC93_TO_CHORUS_SEND];
 #endif

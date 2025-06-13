@@ -210,12 +210,12 @@ EAS_RESULT EAS_IntSetStrmParam (S_EAS_DATA *pEASData, EAS_HANDLE pStream, EAS_IN
             VMSetVolume(pSynth, value);
             break;
     
-#ifdef _CHORUS
+#ifdef _CC_CHORUS
         case PARSER_DATA_CHORUS_ENABLED:
             pSynth->chorusEnabled = (EAS_BOOL) value;
             break;
 #endif
-#ifdef _REVERB  
+#ifdef _CC_REVERB  
         case PARSER_DATA_REVERB_ENABLED:
             pSynth->reverbEnabled = (EAS_BOOL) value;
             break;

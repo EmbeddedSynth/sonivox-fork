@@ -138,11 +138,11 @@
 #define DEFAULT_CHANNEL_VOLUME  0x64
 #define DEFAULT_PAN             0x40    /* decimal 64, center */
 
-#ifdef _REVERB
+#ifdef _CC_REVERB
 #define DEFAULT_REVERB_SEND     40      /* some reverb */
 #endif
 
-#ifdef _CHORUS
+#ifdef _CC_CHORUS
 #define DEFAULT_CHORUS_SEND     0       /* no chorus */
 #endif
 
@@ -312,8 +312,13 @@ typedef struct s_synth_tag
 
     // Moved from S_SYNTH_CHANNEL to here
     // to improve caching
+#if defined(_CC_REVERB)
     EAS_U8                  reverbSendLevels[NUM_SYNTH_CHANNELS]; // CC91
+#endif
+#if defined(_CC_CHORUS)
     EAS_U8                  chorusSendLevels[NUM_SYNTH_CHANNELS]; // CC93
+#endif
+
     S_SYNTH_CHANNEL         channels[NUM_SYNTH_CHANNELS];
     EAS_I32                 totalNoteCount;
     EAS_U16                 maxPolyphony;
@@ -328,10 +333,10 @@ typedef struct s_synth_tag
     EAS_U8                  refCount;
     EAS_U8                  priority;
 
-#ifdef _CHORUS
+#ifdef _CC_CHORUS
     EAS_BOOL                chorusEnabled;
 #endif
-#ifdef _REVERB
+#ifdef _CC_REVERB
     EAS_BOOL                reverbEnabled;
 #endif
 } S_SYNTH;
@@ -356,12 +361,12 @@ typedef struct s_voice_mgr_tag
     S_WT_VOICE              wtVoices[NUM_WT_VOICES];
 #endif
 
-#ifdef _REVERB
+#ifdef _CC_REVERB
     EAS_PCM                 reverbSendBuffer[NUM_OUTPUT_CHANNELS * BUFFER_SIZE_IN_MONO_SAMPLES];
     EAS_VOID_PTR            reverbData;
 #endif
 
-#ifdef _CHORUS
+#ifdef _CC_CHORUS
     EAS_PCM                 chorusSendBuffer[NUM_OUTPUT_CHANNELS * BUFFER_SIZE_IN_MONO_SAMPLES];
     EAS_VOID_PTR            chorusData;
 #endif

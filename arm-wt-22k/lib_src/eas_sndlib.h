@@ -196,12 +196,12 @@ typedef struct s_dls_articulation_tag
     EAS_I8          pan;
     EAS_U8          filterQandFlags;
 
-#ifdef _REVERB
+#ifdef _CC_REVERB
     EAS_I16         reverbSend;
     EAS_I16         cc91ToReverbSend;
 #endif
 
-#ifdef _CHORUS
+#ifdef _CC_CHORUS
     EAS_I16         chorusSend;
     EAS_I16         cc93ToChorusSend;
 #endif
