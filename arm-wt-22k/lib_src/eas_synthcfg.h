@@ -30,6 +30,15 @@
 #ifndef _EAS_SYNTHCFG_H
 #define _EAS_SYNTHCFG_H
 
+// TODO: we may need a better way to handle these fx
+#ifdef _CHORUS_ENABLED
+#define _CC_CHORUS
+#endif
+
+#ifdef _REVERB_ENABLED
+#define _CC_REVERB
+#endif
+
 #if defined(EAS_WT_SYNTH)
 #define _WT_SYNTH
 

@@ -170,8 +170,6 @@ target_compile_definitions( sonivox-objects PRIVATE
   #_OTA_PARSER
   _XMF_PARSER
   #JET_INTERFACE
-  _CC_REVERB
-  _CC_CHORUS
 )
 
 include(TestBigEndian)
