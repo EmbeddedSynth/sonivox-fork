@@ -141,6 +141,11 @@ endif()
 
 configure_file(arm-wt-22k/host_src/eas_version.h.in libsonivox/eas_version.h @ONLY)
 
+if (EXISTS "${CMAKE_CURRENT_BINARY_DIR}/libsonivox/eas.h")
+    message(NOTICE "Legacy libsonivox/eas.h file found in the build directory. Renaming it to eas.h.old")
+    file(RENAME "${CMAKE_CURRENT_BINARY_DIR}/libsonivox/eas.h" "${CMAKE_CURRENT_BINARY_DIR}/libsonivox/eas.h.old")
+endif()
+
 list(APPEND HEADERS
     ${CMAKE_CURRENT_BINARY_DIR}/libsonivox/eas_version.h
     arm-wt-22k/host_src/eas.h
