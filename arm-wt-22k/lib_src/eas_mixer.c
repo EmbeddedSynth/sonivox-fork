@@ -218,7 +218,7 @@ void EAS_MixEnginePost (S_EAS_DATA *pEASData, EAS_I32 numSamples)
 
 #ifdef _REVERB_ENABLED
     /* Reverb effect */
-    if (pEASData->effectsModules[EAS_MODULE_REVERB].effectData)
+    if (pEASData->effectsModules[EAS_MODULE_REVERB].effectData && pEASData->pVoiceMgr->reverbModule.effectData == NULL)
         (*pEASData->effectsModules[EAS_MODULE_REVERB].effect->pfProcess)
             (pEASData->effectsModules[EAS_MODULE_REVERB].effectData,
             pEASData->pOutputAudioBuffer,
@@ -228,7 +228,7 @@ void EAS_MixEnginePost (S_EAS_DATA *pEASData, EAS_I32 numSamples)
 
 #ifdef _CHORUS_ENABLED
     /* Chorus effect */
-    if (pEASData->effectsModules[EAS_MODULE_CHORUS].effectData)
+    if (pEASData->effectsModules[EAS_MODULE_CHORUS].effectData && pEASData->pVoiceMgr->chorusModule.effectData == NULL)
         (*pEASData->effectsModules[EAS_MODULE_CHORUS].effect->pfProcess)
             (pEASData->effectsModules[EAS_MODULE_CHORUS].effectData,
             pEASData->pOutputAudioBuffer,

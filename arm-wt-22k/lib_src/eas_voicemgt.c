@@ -46,16 +46,10 @@
 #ifdef _CC_REVERB
 #include "eas_reverb.h"
 #include "eas_reverbdata.h"
-extern const S_EFFECTS_INTERFACE EAS_Reverb;
 #endif
 #ifdef _CC_CHORUS
 #include "eas_chorus.h"
 #include "eas_chorusdata.h"
-extern const S_EFFECTS_INTERFACE EAS_Chorus;
-#endif
-
-#if (defined (_CC_CHORUS) || defined (_CC_REVERB)) && defined (_STATIC_MEMORY)
-#error "Chorus and Reverb send require dynamic memory model"
 #endif
 
 // #define _DEBUG_VM
@@ -326,25 +320,11 @@ EAS_RESULT VMInitialize (S_EAS_DATA *pEASData)
 #endif
 
 #ifdef _CC_CHORUS
-    result = EAS_Chorus.pfInit(pEASData, &pVoiceMgr->chorusData);
-    if (result != EAS_SUCCESS) {
-        EAS_Report(_EAS_SEVERITY_FATAL, "VMInitialize: EAS_Chorus.pfInit returned %ld\n", result);
-        goto error_cleanup;
-    }
-    EAS_Chorus.pFSetParam(pVoiceMgr->chorusData, EAS_PARAM_CHORUS_BYPASS, EAS_FALSE);
-    EAS_Chorus.pFSetParam(pVoiceMgr->chorusData, EAS_PARAM_CHORUS_DRY, 0);
-    EAS_Chorus.pFSetParam(pVoiceMgr->chorusData, EAS_PARAM_CHORUS_LEVEL, EAS_CHORUS_LEVEL_MAX);
+    VMInitChorus(pEASData, pVoiceMgr);
 #endif
 
 #ifdef _CC_REVERB
-    result = EAS_Reverb.pfInit(pEASData, &pVoiceMgr->reverbData);
-    if (result != EAS_SUCCESS) {
-        EAS_Report(_EAS_SEVERITY_FATAL, "VMInitialize: EAS_Reverb.pfInit returned %ld\n", result);
-        goto error_cleanup;
-    }
-    EAS_Reverb.pFSetParam(pVoiceMgr->reverbData, EAS_PARAM_REVERB_BYPASS, EAS_FALSE);
-    EAS_Reverb.pFSetParam(pVoiceMgr->reverbData, EAS_PARAM_REVERB_DRY, 0);
-    EAS_Reverb.pFSetParam(pVoiceMgr->reverbData, EAS_PARAM_REVERB_WET, EAS_REVERB_WET_MAX);
+    VMInitReverb(pEASData, pVoiceMgr);
 #endif
 
     pEASData->pVoiceMgr = pVoiceMgr;
@@ -356,6 +336,81 @@ error_cleanup:
     }
     return result;
 }
+
+#ifdef _CC_REVERB
+EAS_RESULT VMInitReverb(S_EAS_DATA *pEASData, S_VOICE_MGR *pVoiceMgr)
+{
+    if (pEASData == NULL || pVoiceMgr == NULL)
+    {
+        return EAS_ERROR_INVALID_PARAMETER;
+    }
+
+    pVoiceMgr->reverbModule = pEASData->effectsModules[EAS_MODULE_REVERB];
+    if (pVoiceMgr->reverbModule.effect == NULL)
+    {
+        EAS_Report(_EAS_SEVERITY_ERROR, "VMInitReverb: Reverb module is not available in this build or EAS is not initalized\n");
+        return EAS_ERROR_INVALID_MODULE;
+    }
+    if (pVoiceMgr->reverbModule.effectData == NULL)
+    {
+        EAS_Report(_EAS_SEVERITY_ERROR, "VMInitReverb: Reverb module is not initalized\n");
+        pVoiceMgr->reverbModule.effect = NULL;
+        return EAS_ERROR_INVALID_HANDLE;
+    }
+
+    // TODO: a reset function may be needed to reinitialize the effect
+
+    pVoiceMgr->reverbModule.effect->pFSetParam(pVoiceMgr->reverbModule.effectData, EAS_PARAM_REVERB_BYPASS, EAS_FALSE);
+    pVoiceMgr->reverbModule.effect->pFSetParam(pVoiceMgr->reverbModule.effectData, EAS_PARAM_REVERB_DRY, 0);
+    pVoiceMgr->reverbModule.effect->pFSetParam(pVoiceMgr->reverbModule.effectData, EAS_PARAM_REVERB_WET, EAS_REVERB_WET_MAX);
+
+    return EAS_SUCCESS;
+}
+
+void VMShutdownReverb(S_VOICE_MGR *pVoiceMgr)
+{
+    pVoiceMgr->reverbModule.effect = NULL;
+    pVoiceMgr->reverbModule.effectData = NULL;
+}
+#endif
+
+#ifdef _CC_CHORUS
+EAS_RESULT VMInitChorus(S_EAS_DATA *pEASData, S_VOICE_MGR *pVoiceMgr)
+{
+    if (pEASData == NULL || pVoiceMgr == NULL)
+    {
+        return EAS_ERROR_INVALID_PARAMETER;
+    }
+
+    pVoiceMgr->chorusModule = pEASData->effectsModules[EAS_MODULE_CHORUS];
+    if (pVoiceMgr->chorusModule.effect == NULL)
+    {
+        EAS_Report(_EAS_SEVERITY_ERROR, "VMInitChorus: Chorus module is not available in this build or EAS is not initalized\n");
+        return EAS_ERROR_INVALID_MODULE;
+    }
+    if (pVoiceMgr->chorusModule.effectData == NULL)
+    {
+        EAS_Report(_EAS_SEVERITY_ERROR, "VMInitChorus: Chorus module is not initalized\n");
+        pVoiceMgr->chorusModule.effect = NULL;
+        return EAS_ERROR_INVALID_HANDLE;
+    }
+
+    // TODO: a reset function may be needed to reinitialize the effect
+
+    pVoiceMgr->chorusModule.effect->pFSetParam(pVoiceMgr->chorusModule.effectData, EAS_PARAM_CHORUS_BYPASS, EAS_FALSE);
+    pVoiceMgr->chorusModule.effect->pFSetParam(pVoiceMgr->chorusModule.effectData, EAS_PARAM_CHORUS_DRY, 0);
+    pVoiceMgr->chorusModule.effect->pFSetParam(pVoiceMgr->chorusModule.effectData, EAS_PARAM_CHORUS_LEVEL, EAS_CHORUS_LEVEL_MAX);
+
+    return EAS_SUCCESS;
+}
+
+void VMShutdownChorus(S_VOICE_MGR *pVoiceMgr)
+{
+    pVoiceMgr->chorusModule.effect = NULL;
+    pVoiceMgr->chorusModule.effectData = NULL;
+}
+#endif
+
 
 /*----------------------------------------------------------------------------
  * VMInitMIDI()
@@ -3034,8 +3089,8 @@ EAS_I32 VMAddSamples (S_VOICE_MGR *pVoiceMgr, EAS_I32 *pMixBuffer, EAS_I32 numSa
     }
 
 #if defined (_CC_CHORUS)
-    if (chorusProcess) {
-        EAS_Chorus.pfProcess(pVoiceMgr->chorusData, pVoiceMgr->chorusSendBuffer, pVoiceMgr->chorusSendBuffer, numSamples);
+    if (chorusProcess && pVoiceMgr->chorusModule.effectData != NULL) {
+        pVoiceMgr->chorusModule.effect->pfProcess(pVoiceMgr->chorusModule.effectData, pVoiceMgr->chorusSendBuffer, pVoiceMgr->chorusSendBuffer, numSamples);
         for (EAS_INT i = 0; i < numSamples * NUM_OUTPUT_CHANNELS; i++) {
             pMixBuffer[i] = pMixBuffer[i] + pVoiceMgr->chorusSendBuffer[i];
         }
@@ -3044,8 +3099,8 @@ EAS_I32 VMAddSamples (S_VOICE_MGR *pVoiceMgr, EAS_I32 *pMixBuffer, EAS_I32 numSa
     // GM2 specification says there is a connection from chorus output to reverb send
     // but where is its CC controller
 #if defined (_CC_REVERB)
-    if (reverbProcess) {
-        EAS_Reverb.pfProcess(pVoiceMgr->reverbData, pVoiceMgr->reverbSendBuffer, pVoiceMgr->reverbSendBuffer, numSamples);
+    if (reverbProcess && pVoiceMgr->reverbModule.effectData != NULL) {
+        pVoiceMgr->reverbModule.effect->pfProcess(pVoiceMgr->reverbModule.effectData, pVoiceMgr->reverbSendBuffer, pVoiceMgr->reverbSendBuffer, numSamples);
         for (EAS_INT i = 0; i < numSamples * NUM_OUTPUT_CHANNELS; i++) {
             pMixBuffer[i] = pMixBuffer[i] + pVoiceMgr->reverbSendBuffer[i];
         }
@@ -3951,14 +4006,6 @@ void VMShutdown (S_EAS_DATA *pEASData)
         DLSCleanup(pEASData->hwInstData, pEASData->pVoiceMgr->pGlobalDLS);
         pEASData->pVoiceMgr->pGlobalDLS = NULL;
     }
-#endif
-
-#ifdef _CC_CHORUS
-    EAS_Chorus.pfShutdown(pEASData, pEASData->pVoiceMgr->chorusData);
-#endif
-
-#ifdef _CC_REVERB
-    EAS_Reverb.pfShutdown(pEASData, pEASData->pVoiceMgr->reverbData);
 #endif
 
     /* check Configuration Module for static memory allocation */

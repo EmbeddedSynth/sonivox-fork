@@ -44,6 +44,9 @@
 #include "eas_vm_protos.h"
 #include "eas_math.h"
 
+#include "eas_chorus.h"
+#include "eas_reverb.h"
+
 #ifdef JET_INTERFACE
 #include "jet_data.h"
 #endif
@@ -432,17 +435,6 @@ EAS_PUBLIC EAS_RESULT EAS_Init (EAS_DATA_HANDLE *ppEASData)
     }
 #endif
 
-    /* initailize the voice manager & synthesizer */
-    if ((result = VMInitialize(pEASData)) != EAS_SUCCESS)
-        return result;
-
-    /* initialize mix engine */
-    if ((result = EAS_MixEngineInit(pEASData)) != EAS_SUCCESS)
-    {
-        EAS_Report(_EAS_SEVERITY_ERROR, "Error %ld starting up mix engine\n", result);
-        return result;
-    }
-
     /* initialize effects modules */
     for (module = 0; module < NUM_EFFECTS_MODULES; module++)
     {
@@ -455,6 +447,17 @@ EAS_PUBLIC EAS_RESULT EAS_Init (EAS_DATA_HANDLE *ppEASData)
                 return result;
             }
         }
+    }
+
+    /* initailize the voice manager & synthesizer */
+    if ((result = VMInitialize(pEASData)) != EAS_SUCCESS)
+        return result;
+
+    /* initialize mix engine */
+    if ((result = EAS_MixEngineInit(pEASData)) != EAS_SUCCESS)
+    {
+        EAS_Report(_EAS_SEVERITY_ERROR, "Error %ld starting up mix engine\n", result);
+        return result;
     }
 
     /* initialize PCM engine */
@@ -526,6 +529,9 @@ EAS_PUBLIC EAS_RESULT EAS_Shutdown (EAS_DATA_HANDLE pEASData)
             reportResult = result;
     }
 
+    /* shutdown the voice manager & synthesizer */
+    VMShutdown(pEASData);
+
     /* shutdown effects modules */
     for (i = 0; i < NUM_EFFECTS_MODULES; i++)
     {
@@ -539,9 +545,6 @@ EAS_PUBLIC EAS_RESULT EAS_Shutdown (EAS_DATA_HANDLE pEASData)
             }
         }
     }
-
-    /* shutdown the voice manager & synthesizer */
-    VMShutdown(pEASData);
 
 #ifdef _METRICS_ENABLED
     /* shutdown the metrics module */
@@ -2305,6 +2308,18 @@ EAS_PUBLIC EAS_RESULT EAS_GetParameter (EAS_DATA_HANDLE pEASData, EAS_I32 module
     if (pEASData->effectsModules[module].effectData == NULL)
         return EAS_ERROR_INVALID_MODULE;
 
+    if (module == EAS_MODULE_CHORUS && param == EAS_PARAM_CHORUS_OVERRIDE_CC)
+    {
+        *pValue = pEASData->pVoiceMgr->chorusModule.effectData != NULL;
+        return EAS_SUCCESS;
+    }
+
+    if (module == EAS_MODULE_REVERB && param == EAS_PARAM_REVERB_OVERRIDE_CC)
+    {
+        *pValue = pEASData->pVoiceMgr->reverbModule.effectData != NULL;
+        return EAS_SUCCESS;
+    }
+
     return (*pEASData->effectsModules[module].effect->pFGetParam)
         (pEASData->effectsModules[module].effectData, param, pValue);
 }
@@ -2339,6 +2354,56 @@ EAS_PUBLIC EAS_RESULT EAS_SetParameter (EAS_DATA_HANDLE pEASData, EAS_I32 module
 
     if (pEASData->effectsModules[module].effectData == NULL)
         return EAS_ERROR_INVALID_MODULE;
+
+    if (module == EAS_MODULE_CHORUS)
+    {
+        switch (param) {
+        case EAS_PARAM_CHORUS_OVERRIDE_CC:
+            if (value != 0 && pEASData->pVoiceMgr->chorusModule.effectData != NULL)
+            {
+                VMShutdownChorus(pEASData->pVoiceMgr);
+                return EAS_SUCCESS;
+            }
+            if (value == 0 && pEASData->pVoiceMgr->chorusModule.effectData == NULL)
+            {
+                return VMInitChorus(pEASData, pEASData->pVoiceMgr);
+            }
+            return EAS_SUCCESS;
+        case EAS_PARAM_CHORUS_BYPASS:
+            if (pEASData->pVoiceMgr->chorusModule.effectData != NULL)
+            {
+                EAS_Report(_EAS_SEVERITY_ERROR, "Setting EAS_PARAM_CHORUS_BYPASS while not overriding CC is not allowed\n");
+                return EAS_ERROR_INVALID_PARAMETER;
+            }
+        default:
+            break;
+        }
+    }
+
+    if (module == EAS_MODULE_REVERB)
+    {
+        switch (param) {
+        case EAS_PARAM_REVERB_OVERRIDE_CC:
+            if (value != 0 && pEASData->pVoiceMgr->reverbModule.effectData != NULL)
+            {
+                VMShutdownReverb(pEASData->pVoiceMgr);
+                return EAS_SUCCESS;
+            }
+            if (value == 0 && pEASData->pVoiceMgr->reverbModule.effectData == NULL)
+            {
+                return VMInitReverb(pEASData, pEASData->pVoiceMgr);
+            }
+            return EAS_SUCCESS;
+        case EAS_PARAM_REVERB_BYPASS:
+            if (pEASData->pVoiceMgr->reverbModule.effectData != NULL)
+            {
+                EAS_Report(_EAS_SEVERITY_ERROR, "Setting EAS_PARAM_REVERB_BYPASS while not overriding CC is not allowed\n");
+                return EAS_ERROR_INVALID_PARAMETER;
+            }
+        default:
+            break;
+        }
+    }
 
     return (*pEASData->effectsModules[module].effect->pFSetParam)
         (pEASData->effectsModules[module].effectData, param, value);

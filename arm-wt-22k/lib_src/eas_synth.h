@@ -31,6 +31,7 @@
 #define _EAS_SYNTH_H
 
 #include "eas_audioconst.h"
+#include "eas_effects.h"
 #include "eas_types.h"
 #include "eas_sndlib.h"
 
@@ -363,12 +364,12 @@ typedef struct s_voice_mgr_tag
 
 #ifdef _CC_REVERB
     EAS_PCM                 reverbSendBuffer[NUM_OUTPUT_CHANNELS * BUFFER_SIZE_IN_MONO_SAMPLES];
-    EAS_VOID_PTR            reverbData;
+    S_EFFECTS_MODULE        reverbModule;
 #endif
 
 #ifdef _CC_CHORUS
     EAS_PCM                 chorusSendBuffer[NUM_OUTPUT_CHANNELS * BUFFER_SIZE_IN_MONO_SAMPLES];
-    EAS_VOID_PTR            chorusData;
+    S_EFFECTS_MODULE        chorusModule;
 #endif
     S_SYNTH_VOICE           voices[MAX_SYNTH_VOICES];
 

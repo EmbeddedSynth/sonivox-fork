@@ -34,9 +34,11 @@
 
 const char *dls_path = NULL;
 EAS_I32 playback_gain = 90;
+EAS_BOOL reverb_override = EAS_FALSE;
 EAS_I32 reverb_type = 0;
 EAS_I32 reverb_wet = 32767;
 EAS_I32 reverb_dry = 0;
+EAS_BOOL chorus_override = EAS_FALSE;
 EAS_I32 chorus_type = 0;
 EAS_I32 chorus_level = 32767;
 EAS_DATA_HANDLE mEASDataHandle = NULL;
@@ -152,64 +154,82 @@ int initializeLibrary(void)
         goto cleanup;
     }
 
-    EAS_BOOL reverb_bypass = EAS_TRUE;
-    EAS_I32 reverb_preset = reverb_type - 1;
-    if ( reverb_preset >= EAS_PARAM_REVERB_LARGE_HALL && reverb_preset <= EAS_PARAM_REVERB_ROOM ) {
-        reverb_bypass = EAS_FALSE;
-        result = EAS_SetParameter(mEASDataHandle, EAS_MODULE_REVERB, EAS_PARAM_REVERB_PRESET, reverb_preset);
+    if (reverb_override) {
+        result = EAS_SetParameter(mEASDataHandle, EAS_MODULE_REVERB, EAS_PARAM_REVERB_OVERRIDE_CC, 1);
         if (result != EAS_SUCCESS) {
-            fprintf(stderr, "Failed to set reverb preset");
-            ok = EXIT_FAILURE;
-            goto cleanup;
-        }
-        result = EAS_SetParameter(mEASDataHandle,
-                                  EAS_MODULE_REVERB,
-                                  EAS_PARAM_REVERB_WET,
-                                  reverb_wet);
-        if (result != EAS_SUCCESS) {
-            fprintf(stderr, "Failed to set reverb wet amount");
+            fprintf(stderr, "Failed to enable reverb override\n");
             ok = EXIT_FAILURE;
             goto cleanup;
         }
 
-        result = EAS_SetParameter(mEASDataHandle, EAS_MODULE_REVERB, EAS_PARAM_REVERB_DRY, reverb_dry);
-        if (result != EAS_SUCCESS) {
-            fprintf(stderr, "Failed to set reverb dry amount");
-            ok = EXIT_FAILURE;
-            goto cleanup;
-        }
-    }
-    result = EAS_SetParameter(mEASDataHandle, EAS_MODULE_REVERB, EAS_PARAM_REVERB_BYPASS, reverb_bypass);
-    if (result != EAS_SUCCESS) {
-        fprintf(stderr, "Failed to set reverb bypass");
-        ok = EXIT_FAILURE;
-        goto cleanup;
-    }
+        EAS_BOOL reverb_bypass = EAS_TRUE;
+        EAS_I32 reverb_preset = reverb_type - 1;
+        if ( reverb_preset >= EAS_PARAM_REVERB_LARGE_HALL && reverb_preset <= EAS_PARAM_REVERB_ROOM ) {
+            reverb_bypass = EAS_FALSE;
+            result = EAS_SetParameter(mEASDataHandle, EAS_MODULE_REVERB, EAS_PARAM_REVERB_PRESET, reverb_preset);
+            if (result != EAS_SUCCESS) {
+                fprintf(stderr, "Failed to set reverb preset");
+                ok = EXIT_FAILURE;
+                goto cleanup;
+            }
+            result = EAS_SetParameter(mEASDataHandle,
+                                    EAS_MODULE_REVERB,
+                                    EAS_PARAM_REVERB_WET,
+                                    reverb_wet);
+            if (result != EAS_SUCCESS) {
+                fprintf(stderr, "Failed to set reverb wet amount");
+                ok = EXIT_FAILURE;
+                goto cleanup;
+            }
 
-    EAS_BOOL chorus_bypass = EAS_TRUE;
-    EAS_I32 chorus_preset = chorus_type - 1;
-    if ( chorus_preset >= EAS_PARAM_CHORUS_PRESET1 && chorus_preset <= EAS_PARAM_CHORUS_PRESET4 ) {
-        chorus_bypass = EAS_FALSE;
-        result = EAS_SetParameter(mEASDataHandle, EAS_MODULE_CHORUS, EAS_PARAM_CHORUS_PRESET, chorus_preset);
-        if (result != EAS_SUCCESS) {
-            fprintf(stderr, "Failed to set chorus preset");
-            ok = EXIT_FAILURE;
-            goto cleanup;
+            result = EAS_SetParameter(mEASDataHandle, EAS_MODULE_REVERB, EAS_PARAM_REVERB_DRY, reverb_dry);
+            if (result != EAS_SUCCESS) {
+                fprintf(stderr, "Failed to set reverb dry amount");
+                ok = EXIT_FAILURE;
+                goto cleanup;
+            }
         }
-
-        result = EAS_SetParameter(mEASDataHandle, EAS_MODULE_CHORUS, EAS_PARAM_CHORUS_LEVEL, chorus_level);
+        result = EAS_SetParameter(mEASDataHandle, EAS_MODULE_REVERB, EAS_PARAM_REVERB_BYPASS, reverb_bypass);
         if (result != EAS_SUCCESS) {
-            fprintf(stderr, "Failed to set chorus level");
+            fprintf(stderr, "Failed to set reverb bypass");
             ok = EXIT_FAILURE;
             goto cleanup;
         }
     }
 
-    result = EAS_SetParameter(mEASDataHandle, EAS_MODULE_CHORUS, EAS_PARAM_CHORUS_BYPASS, chorus_bypass);
-    if (result != EAS_SUCCESS) {
-        fprintf(stderr, "Failed to set chorus bypass");
-        ok = EXIT_FAILURE;
-        goto cleanup;
+    if (chorus_override) {
+        result = EAS_SetParameter(mEASDataHandle, EAS_MODULE_CHORUS, EAS_PARAM_CHORUS_OVERRIDE_CC, 1);
+        if (result != EAS_SUCCESS) {
+            fprintf(stderr, "Failed to enable chorus override\n");
+            ok = EXIT_FAILURE;
+            goto cleanup;
+        }
+
+        EAS_BOOL chorus_bypass = EAS_TRUE;
+        EAS_I32 chorus_preset = chorus_type - 1;
+        if ( chorus_preset >= EAS_PARAM_CHORUS_PRESET1 && chorus_preset <= EAS_PARAM_CHORUS_PRESET4 ) {
+            chorus_bypass = EAS_FALSE;
+            result = EAS_SetParameter(mEASDataHandle, EAS_MODULE_CHORUS, EAS_PARAM_CHORUS_PRESET, chorus_preset);
+            if (result != EAS_SUCCESS) {
+                fprintf(stderr, "Failed to set chorus preset");
+                ok = EXIT_FAILURE;
+                goto cleanup;
+            }
+
+            result = EAS_SetParameter(mEASDataHandle, EAS_MODULE_CHORUS, EAS_PARAM_CHORUS_LEVEL, chorus_level);
+            if (result != EAS_SUCCESS) {
+                fprintf(stderr, "Failed to set chorus level");
+                ok = EXIT_FAILURE;
+                goto cleanup;
+            }
+        }
+
+        result = EAS_SetParameter(mEASDataHandle, EAS_MODULE_CHORUS, EAS_PARAM_CHORUS_BYPASS, chorus_bypass);
+        if (result != EAS_SUCCESS) {
+            fprintf(stderr, "Failed to set chorus bypass");
+            ok = EXIT_FAILURE;
+            goto cleanup;
+        }
     }
 
     return ok;
@@ -399,6 +419,7 @@ int main (int argc, char **argv)
             dls_path = optarg;
             break;
         case 'r':
+            reverb_override = EAS_TRUE;
             reverb_type = atoi(optarg);
             if ((reverb_type < 0) || (reverb_type > 4)) {
                 fprintf (stderr, "invalid reverb preset: %d\n", reverb_type);
@@ -406,6 +427,7 @@ int main (int argc, char **argv)
             }
             break;
         case 'w':
+            reverb_override = EAS_TRUE;
             reverb_wet = atoi(optarg);
             if ((reverb_wet < 0) || (reverb_wet > 32767)) {
                 fprintf (stderr, "invalid reverb wet: %d\n", reverb_wet);
@@ -413,6 +435,7 @@ int main (int argc, char **argv)
             }
             break;
         case 'n':
+            reverb_override = EAS_TRUE;
             reverb_dry = atoi(optarg);
             if ((reverb_dry < 0) || (reverb_dry > 32767)) {
                 fprintf (stderr, "invalid reverb dry: %d\n", reverb_dry);
@@ -420,6 +443,7 @@ int main (int argc, char **argv)
             }
             break;
         case 'c':
+            chorus_override = EAS_TRUE;
             chorus_type = atoi(optarg);
             if ((chorus_type < 0) || (chorus_type > 4)) {
                 fprintf (stderr, "invalid chorus preset: %d\n", chorus_type);
@@ -427,6 +451,7 @@ int main (int argc, char **argv)
             }
             break;
         case 'l':
+            chorus_override = EAS_TRUE;
             chorus_level = atoi(optarg);
             if ((chorus_level < 0) || (chorus_level > 32767)) {
                 fprintf (stderr, "invalid chorus level: %d\n", chorus_level);

@@ -1082,5 +1082,15 @@ EAS_BOOL VMStartFrame (S_EAS_DATA *pEASData);
 EAS_BOOL VMEndFrame (S_EAS_DATA *pEASData);
 #endif
 
+#ifdef _CC_REVERB
+EAS_RESULT VMInitReverb (S_EAS_DATA *pEASData, S_VOICE_MGR* pVoiceMgr);
+void VMShutdownReverb (S_VOICE_MGR* pVoiceMgr);
+#endif
+
+#ifdef _CC_CHORUS
+EAS_RESULT VMInitChorus (S_EAS_DATA *pEASData, S_VOICE_MGR* pVoiceMgr);
+void VMShutdownChorus (S_VOICE_MGR* pVoiceMgr);
+#endif
+
 #endif /* #ifdef _EAS_VM_PROTOS_H */
 
