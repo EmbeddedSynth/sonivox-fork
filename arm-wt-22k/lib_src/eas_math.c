@@ -167,7 +167,7 @@ EAS_I32 EAS_VolumeToGain (EAS_INT volume)
     if (volume <= 0)
         return 0;
 
-    /*lint -e{702} use shift instead of division */
-    return EAS_Calculate2toX((((volume - EAS_REF_VOLUME) * 204099) >> 10) - 1);
+    // 9864 >> 15 is log10(2)
+    return EAS_Calculate2toX((volume - EAS_REF_VOLUME) * 1200 / 20 * 9864 / (1 << 15));
 }
 
