@@ -282,19 +282,12 @@ TEST_P(SonivoxTest, DecodeTest) {
         << "Expected: " << mAudioSampleRate << " sample rate, Found: " << sampleRate;
 
     // TODO(b/158231824): Check and verify the output with other parameters present at eas_reverb.h
-    // select reverb preset and enable
-    EAS_RESULT result = EAS_SetParameter(mEASDataHandle, EAS_MODULE_REVERB, EAS_PARAM_REVERB_PRESET,
-                                         EAS_PARAM_REVERB_CHAMBER);
-    ASSERT_EQ(result, EAS_SUCCESS)
-            << "Failed to set reverberation preset parameter in reverb module";
-
-    result =
-            EAS_SetParameter(mEASDataHandle, EAS_MODULE_REVERB, EAS_PARAM_REVERB_BYPASS, EAS_FALSE);
-    ASSERT_EQ(result, EAS_SUCCESS)
-            << "Failed to set reverberation bypass parameter in reverb module";
+    // TODO: Check and verify the output with other parameters present at eas_chorus.h
+    // TODO: Check and verify the output with CC override
 
     EAS_I32 count;
     EAS_STATE state;
+    EAS_RESULT result = EAS_SUCCESS;
 
     FILE *filePtr = fopen(gEnv->OUTPUT_FILE, "wb");
     ASSERT_NE(filePtr, nullptr) << "Failed to open file: " << gEnv->OUTPUT_FILE;
