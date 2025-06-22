@@ -716,13 +716,13 @@ static void WT_UpdateChannel (S_VOICE_MGR *pVoiceMgr, S_SYNTH *pSynth, EAS_U8 ch
     nChannelGain = (CC7 * CC11)^2  * master volume
     where CC7 == 100 by default, CC11 == 127, master volume == 32767
     */
-    staticGain = MULT_EG1_EG1((pChannel->volume) << (NUM_EG1_FRAC_BITS - 7),
-        (pChannel->expression) << (NUM_EG1_FRAC_BITS - 7));
+    staticGain = MULT_EG1_EG1((pChannel->volume) * 32768 / 127,
+        (pChannel->expression) * 32768 / 127);
 
     /* staticGain has to be squared */
     staticGain = MULT_EG1_EG1(staticGain, staticGain);
 
-    pChannel->staticGain = (EAS_I16) MULT_EG1_EG1(staticGain, pSynth->masterVolume);
+    pChannel->staticGain = (EAS_I16) SATURATE_EG1(MULT_EG1_EG1(staticGain, pSynth->masterVolume));
 
     /*
     calculate pitch bend: RPN0 * ((2*pitch wheel)/16384  -1)
