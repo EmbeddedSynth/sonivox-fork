@@ -1,4 +1,6 @@
-# Fork of the AOSP 'platform_external_sonivox' project to use it outside of Android 
+## Fork of the AOSP 'platform_external_sonivox' project to use it outside of Android
+
+# NOTICE: This repository is now deprecated and has been transferred to [EmbeddedSynth/sonivox](https://github.com/EmbeddedSynth/sonivox).
 
 [![Linux CI](https://github.com/pedrolcl/sonivox/actions/workflows/linux-ci.yml/badge.svg)](https://github.com/pedrolcl/sonivox/actions/workflows/linux-ci.yml)
 
